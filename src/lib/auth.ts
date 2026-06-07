@@ -50,7 +50,11 @@ export async function getAuthContextWithDebug(): Promise<{ ctx: AuthContext | nu
 
   if (!user) return { ctx: null, debug };
 
-  let { data: profile, error: profileSelectError } = await supabase
+  // Use service client for profile fetch to bypass RLS — we already verified
+  // the user is authenticated above via getUser(), and we filter by user.id
+  // so we only return their own row.
+  const service = createServiceClient();
+  let { data: profile, error: profileSelectError } = await service
     .from("profiles")
     .select("*")
     .eq("id", user.id)
@@ -61,7 +65,6 @@ export async function getAuthContextWithDebug(): Promise<{ ctx: AuthContext | nu
   // Self-heal: user existed before trigger was installed.
   if (!profile) {
     try {
-      const service = createServiceClient();
       const fullName =
         (user.user_metadata?.full_name as string | undefined) ??
         user.email?.split("@")[0] ??
