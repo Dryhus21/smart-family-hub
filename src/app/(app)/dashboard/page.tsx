@@ -4,21 +4,69 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatDateShortID, formatTimeID, daysUntil } from "@/lib/utils";
 import { TASK_STATUS_LABEL } from "@/lib/types";
-import OnboardingPanel from "./onboarding-panel";
+import { createFamilyAction, joinByTokenAction } from "../../onboarding/actions";
 
-export default async function DashboardPage() {
+export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ mode?: string; err?: string }> }) {
   const auth = await getAuthContext();
   if (!auth) redirect("/login");
 
+  const sp = await searchParams;
+
   // No family yet — show onboarding inline (no extra redirect needed).
   if (!auth.family || !auth.membership) {
+    const mode = sp.mode === "join" ? "join" : "create";
+    const errorMsg = sp.err ? decodeURIComponent(sp.err) : null;
     return (
       <div className="py-6">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-slate-900">Halo, {auth.profile.full_name}!</h1>
           <p className="mt-1 text-sm text-slate-600">Untuk memulai, buat keluarga baru atau gabung dengan kode undangan.</p>
         </div>
-        <OnboardingPanel />
+
+        <div className="card">
+          <div className="mb-6 flex gap-2 border-b border-slate-200">
+            <Link
+              href="/dashboard?mode=create"
+              className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium ${mode === "create" ? "border-indigo-600 text-indigo-600" : "border-transparent text-slate-500"}`}
+            >
+              Buat Keluarga Baru
+            </Link>
+            <Link
+              href="/dashboard?mode=join"
+              className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium ${mode === "join" ? "border-indigo-600 text-indigo-600" : "border-transparent text-slate-500"}`}
+            >
+              Gabung dengan Kode
+            </Link>
+          </div>
+
+          {errorMsg && (
+            <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{errorMsg}</div>
+          )}
+
+          {mode === "create" ? (
+            <form action={createFamilySubmit} className="space-y-4">
+              <div>
+                <label className="label" htmlFor="family_name">Nama Keluarga</label>
+                <input className="input" id="family_name" name="family_name" type="text" placeholder="Keluarga Santoso" required />
+              </div>
+              <div>
+                <label className="label" htmlFor="description">Deskripsi (opsional)</label>
+                <textarea className="input min-h-24" id="description" name="description" placeholder="Ceritakan singkat tentang keluarga Anda" />
+              </div>
+              <button className="btn btn-primary" type="submit">Buat Keluarga</button>
+              <p className="text-xs text-slate-500">Anda akan otomatis menjadi Admin keluarga ini.</p>
+            </form>
+          ) : (
+            <form action={joinSubmit} className="space-y-4">
+              <div>
+                <label className="label" htmlFor="token">Kode Undangan</label>
+                <input className="input font-mono" id="token" name="token" type="text" placeholder="Tempel kode undangan di sini" required />
+                <p className="mt-1 text-xs text-slate-500">Kode didapat dari admin keluarga setelah mereka mengundang email Anda.</p>
+              </div>
+              <button className="btn btn-primary" type="submit">Gabung Keluarga</button>
+            </form>
+          )}
+        </div>
       </div>
     );
   }
@@ -170,4 +218,22 @@ function StatCard({ label, value, icon, href }: { label: string; value: number; 
       </div>
     </Link>
   );
+}
+
+// Server actions wrapped to convert ActionResult errors into URL query so the
+// page can render them statically (no client-side useActionState needed).
+async function createFamilySubmit(formData: FormData) {
+  "use server";
+  const result = await createFamilyAction({}, formData);
+  if (result?.error) {
+    redirect(`/dashboard?mode=create&err=${encodeURIComponent(result.error)}`);
+  }
+}
+
+async function joinSubmit(formData: FormData) {
+  "use server";
+  const result = await joinByTokenAction({}, formData);
+  if (result?.error) {
+    redirect(`/dashboard?mode=join&err=${encodeURIComponent(result.error)}`);
+  }
 }
