@@ -86,7 +86,8 @@ export async function getAuthContextWithDebug(): Promise<{ ctx: AuthContext | nu
   if (!profile) return { ctx: null, debug };
   debug.profileFound = true;
 
-  const { data: membership } = await supabase
+  // Use service client for family lookups too — same reason as profile.
+  const { data: membership } = await service
     .from("family_members")
     .select("*")
     .eq("user_id", user.id)
@@ -94,7 +95,7 @@ export async function getAuthContextWithDebug(): Promise<{ ctx: AuthContext | nu
 
   let family: Family | null = null;
   if (membership) {
-    const { data: famRow } = await supabase
+    const { data: famRow } = await service
       .from("families")
       .select("*")
       .eq("id", membership.family_id)
