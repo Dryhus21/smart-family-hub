@@ -1,29 +1,44 @@
 import Link from "next/link";
-import { getAuthContext } from "@/lib/auth";
+import { cookies } from "next/headers";
+import { getAuthContextWithDebug } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatDateShortID, formatTimeID, daysUntil } from "@/lib/utils";
 import { TASK_STATUS_LABEL } from "@/lib/types";
 import { createFamilyAction, joinByTokenAction } from "../../onboarding/actions";
 
-export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ mode?: string; err?: string }> }) {
-  const auth = await getAuthContext();
-  // If auth resolution fails, render a sign-in prompt instead of redirecting.
-  // Redirecting from here can cause loops when middleware and server component
-  // disagree on session validity (e.g. stale refresh token cookies).
+export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ mode?: string; err?: string; debug?: string }> }) {
+  const { ctx: auth, debug } = await getAuthContextWithDebug();
+  const sp = await searchParams;
+
   if (!auth) {
+    const cookieStore = await cookies();
+    const sbCookies = cookieStore.getAll().filter((c) => c.name.startsWith("sb-")).map((c) => c.name);
+    const showDebug = sp.debug === "1";
     return (
-      <div className="mx-auto max-w-md py-12 text-center">
+      <div className="mx-auto max-w-lg py-12 text-center">
         <div className="card">
           <h1 className="text-xl font-bold text-slate-900">Sesi Berakhir</h1>
           <p className="mt-2 text-sm text-slate-600">Silakan login kembali untuk melanjutkan.</p>
           <Link href="/login" className="btn btn-primary mt-6 inline-block">Masuk</Link>
+          <div className="mt-4 text-xs">
+            <Link href="/dashboard?debug=1" className="text-slate-500 underline">Tampilkan info debug</Link>
+          </div>
+          {showDebug && (
+            <div className="mt-4 rounded-lg bg-slate-100 p-3 text-left text-xs text-slate-700">
+              <div><strong>hasSession:</strong> {String(debug.hasSession)}</div>
+              <div><strong>sessionUserId:</strong> {debug.sessionUserId ?? "null"}</div>
+              <div><strong>hasUser:</strong> {String(debug.hasUser)}</div>
+              <div><strong>userId:</strong> {debug.userId ?? "null"}</div>
+              <div><strong>userError:</strong> {debug.userError ?? "null"}</div>
+              <div><strong>profileFound:</strong> {String(debug.profileFound)}</div>
+              <div><strong>sb-cookies:</strong> {sbCookies.length ? sbCookies.join(", ") : "(none)"}</div>
+            </div>
+          )}
         </div>
       </div>
     );
   }
-
-  const sp = await searchParams;
 
   // No family yet — show onboarding inline (no extra redirect needed).
   if (!auth.family || !auth.membership) {
