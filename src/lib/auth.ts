@@ -19,6 +19,8 @@ export type AuthDebug = {
   userId: string | null;
   userError: string | null;
   profileFound: boolean;
+  profileError: string | null;
+  serviceKeyPresent: boolean;
 };
 
 export async function getAuthContextWithDebug(): Promise<{ ctx: AuthContext | null; debug: AuthDebug }> {
@@ -42,29 +44,40 @@ export async function getAuthContextWithDebug(): Promise<{ ctx: AuthContext | nu
     userId: validatedUser?.id ?? null,
     userError: userError?.message ?? null,
     profileFound: false,
+    profileError: null,
+    serviceKeyPresent: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
   };
 
   if (!user) return { ctx: null, debug };
 
-  let { data: profile } = await supabase
+  let { data: profile, error: profileSelectError } = await supabase
     .from("profiles")
     .select("*")
     .eq("id", user.id)
     .maybeSingle();
 
+  if (profileSelectError) debug.profileError = `select: ${profileSelectError.message}`;
+
   // Self-heal: user existed before trigger was installed.
   if (!profile) {
-    const service = createServiceClient();
-    const fullName =
-      (user.user_metadata?.full_name as string | undefined) ??
-      user.email?.split("@")[0] ??
-      "Pengguna";
-    const { data: created } = await service
-      .from("profiles")
-      .insert({ id: user.id, full_name: fullName, email: user.email ?? "" })
-      .select()
-      .single();
-    profile = created;
+    try {
+      const service = createServiceClient();
+      const fullName =
+        (user.user_metadata?.full_name as string | undefined) ??
+        user.email?.split("@")[0] ??
+        "Pengguna";
+      const { data: created, error: insertError } = await service
+        .from("profiles")
+        .insert({ id: user.id, full_name: fullName, email: user.email ?? "" })
+        .select()
+        .single();
+      if (insertError) {
+        debug.profileError = `insert: ${insertError.message}`;
+      }
+      profile = created;
+    } catch (e) {
+      debug.profileError = `throw: ${e instanceof Error ? e.message : String(e)}`;
+    }
   }
 
   if (!profile) return { ctx: null, debug };

@@ -32,6 +32,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
               <div><strong>userId:</strong> {debug.userId ?? "null"}</div>
               <div><strong>userError:</strong> {debug.userError ?? "null"}</div>
               <div><strong>profileFound:</strong> {String(debug.profileFound)}</div>
+              <div><strong>profileError:</strong> {debug.profileError ?? "null"}</div>
+              <div><strong>serviceKeyPresent:</strong> {String(debug.serviceKeyPresent)}</div>
               <div><strong>sb-cookies:</strong> {sbCookies.length ? sbCookies.join(", ") : "(none)"}</div>
             </div>
           )}
