@@ -8,7 +8,20 @@ import { createFamilyAction, joinByTokenAction } from "../../onboarding/actions"
 
 export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ mode?: string; err?: string }> }) {
   const auth = await getAuthContext();
-  if (!auth) redirect("/login");
+  // If auth resolution fails, render a sign-in prompt instead of redirecting.
+  // Redirecting from here can cause loops when middleware and server component
+  // disagree on session validity (e.g. stale refresh token cookies).
+  if (!auth) {
+    return (
+      <div className="mx-auto max-w-md py-12 text-center">
+        <div className="card">
+          <h1 className="text-xl font-bold text-slate-900">Sesi Berakhir</h1>
+          <p className="mt-2 text-sm text-slate-600">Silakan login kembali untuk melanjutkan.</p>
+          <Link href="/login" className="btn btn-primary mt-6 inline-block">Masuk</Link>
+        </div>
+      </div>
+    );
+  }
 
   const sp = await searchParams;
 

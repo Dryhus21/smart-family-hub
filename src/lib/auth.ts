@@ -69,7 +69,9 @@ export async function getAuthContext(): Promise<AuthContext | null> {
 
 export async function requireAuth(): Promise<AuthContext> {
   const ctx = await getAuthContext();
-  if (!ctx) redirect("/login");
+  // Don't redirect — the middleware should already have caught this.
+  // If we got here without a session, it's a server-side action call; throw.
+  if (!ctx) throw new Error("AUTH_REQUIRED");
   return ctx;
 }
 

@@ -15,7 +15,15 @@ const NAV = [
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const ctx = await getAuthContext();
-  if (!ctx) redirect("/login");
+  // Don't redirect from layout — child pages handle auth themselves to avoid
+  // redirect loops when session state is ambiguous.
+  if (!ctx) {
+    return (
+      <div className="min-h-screen bg-slate-50">
+        <main className="mx-auto max-w-3xl p-4 md:p-8">{children}</main>
+      </div>
+    );
+  }
 
   // If the user has no family, render the children without the navigation
   // chrome. Individual pages (notably /dashboard) will render the onboarding
