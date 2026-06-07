@@ -31,6 +31,7 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
   const isAuthPage = pathname === "/login" || pathname === "/register";
+  const isOnboarding = pathname === "/onboarding";
   const isPublic =
     pathname === "/" ||
     pathname.startsWith("/invite") ||
@@ -38,6 +39,7 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith("/api") ||
     pathname.includes(".");
 
+  // Unauthenticated user trying to reach a private page
   if (!user && !isAuthPage && !isPublic) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
@@ -45,6 +47,7 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Authenticated user on /login or /register -> dashboard
   if (user && isAuthPage) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";

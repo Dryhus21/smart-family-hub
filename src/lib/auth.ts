@@ -75,7 +75,7 @@ export async function requireAuth(): Promise<AuthContext> {
 
 export async function requireFamily(): Promise<AuthContext & { family: Family; membership: FamilyMember }> {
   const ctx = await requireAuth();
-  if (!ctx.family || !ctx.membership) redirect("/onboarding");
+  if (!ctx.family || !ctx.membership) redirect("/dashboard");
   return ctx as AuthContext & { family: Family; membership: FamilyMember };
 }
 

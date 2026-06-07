@@ -16,7 +16,28 @@ const NAV = [
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const ctx = await getAuthContext();
   if (!ctx) redirect("/login");
-  if (!ctx.family) redirect("/onboarding");
+
+  // If the user has no family, render the children without the navigation
+  // chrome. Individual pages (notably /dashboard) will render the onboarding
+  // experience inline. This avoids a server-side redirect from inside this
+  // layout, which can interact badly with the route-group error boundary on
+  // Next.js 16 turbopack and leave the page blank.
+  if (!ctx.family) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+        <header className="mx-auto flex max-w-3xl items-center justify-between px-6 py-6">
+          <Link href="/dashboard" className="flex items-center gap-2">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 font-bold text-white">SF</div>
+            <span className="font-semibold text-slate-900">Smart Family Hub</span>
+          </Link>
+          <form action={logoutAction}>
+            <button className="btn btn-ghost text-sm" type="submit">🚪 Keluar</button>
+          </form>
+        </header>
+        <main className="mx-auto max-w-3xl px-4 pb-12">{children}</main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50">

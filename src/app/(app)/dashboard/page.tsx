@@ -1,11 +1,29 @@
 import Link from "next/link";
-import { requireFamily } from "@/lib/auth";
+import { getAuthContext } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatDateShortID, formatTimeID, daysUntil } from "@/lib/utils";
 import { TASK_STATUS_LABEL } from "@/lib/types";
+import OnboardingForms from "../../onboarding/forms";
 
 export default async function DashboardPage() {
-  const ctx = await requireFamily();
+  const auth = await getAuthContext();
+  if (!auth) redirect("/login");
+
+  // No family yet — show onboarding inline (no extra redirect needed).
+  if (!auth.family || !auth.membership) {
+    return (
+      <div className="py-6">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-slate-900">Halo, {auth.profile.full_name}!</h1>
+          <p className="mt-1 text-sm text-slate-600">Untuk memulai, buat keluarga baru atau gabung dengan kode undangan.</p>
+        </div>
+        <OnboardingForms />
+      </div>
+    );
+  }
+
+  const ctx = auth as typeof auth & { family: NonNullable<typeof auth.family>; membership: NonNullable<typeof auth.membership> };
   const supabase = await createClient();
   const today = new Date().toISOString().slice(0, 10);
 
