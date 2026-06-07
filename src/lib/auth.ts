@@ -1,4 +1,5 @@
 import "server-only";
+import { redirect } from "next/navigation";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import type { Family, FamilyMember, Profile } from "@/lib/types";
 
@@ -17,11 +18,26 @@ export async function getAuthContext(): Promise<AuthContext | null> {
   const user = userResp?.user;
   if (!user) return null;
 
-  const { data: profile } = await supabase
+  let { data: profile } = await supabase
     .from("profiles")
     .select("*")
     .eq("id", user.id)
-    .single();
+    .maybeSingle();
+
+  // Self-heal: user existed before trigger was installed.
+  if (!profile) {
+    const service = createServiceClient();
+    const fullName =
+      (user.user_metadata?.full_name as string | undefined) ??
+      user.email?.split("@")[0] ??
+      "Pengguna";
+    const { data: created } = await service
+      .from("profiles")
+      .insert({ id: user.id, full_name: fullName, email: user.email ?? "" })
+      .select()
+      .single();
+    profile = created;
+  }
 
   if (!profile) return null;
 
@@ -53,13 +69,13 @@ export async function getAuthContext(): Promise<AuthContext | null> {
 
 export async function requireAuth(): Promise<AuthContext> {
   const ctx = await getAuthContext();
-  if (!ctx) throw new Error("Tidak terautentikasi");
+  if (!ctx) redirect("/login");
   return ctx;
 }
 
 export async function requireFamily(): Promise<AuthContext & { family: Family; membership: FamilyMember }> {
   const ctx = await requireAuth();
-  if (!ctx.family || !ctx.membership) throw new Error("Belum bergabung ke keluarga");
+  if (!ctx.family || !ctx.membership) redirect("/onboarding");
   return ctx as AuthContext & { family: Family; membership: FamilyMember };
 }
 
