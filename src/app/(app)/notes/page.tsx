@@ -1,17 +1,25 @@
 import { requireFamily } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { formatDateShortID } from "@/lib/utils";
 import NoteForm from "./form";
 import { deleteNoteAction } from "./actions";
 
 export default async function NotesPage() {
   const ctx = await requireFamily();
-  const supabase = await createClient();
-  const { data: notes } = await supabase
+  const service = createServiceClient();
+
+  const { data: notes } = await service
     .from("notes")
-    .select("*, profile:profiles!notes_created_by_fkey(full_name)")
+    .select("*")
     .eq("family_id", ctx.family.id)
     .order("created_at", { ascending: false });
+
+  const creatorIds = Array.from(new Set((notes ?? []).map((n: { created_by: string }) => n.created_by)));
+  const { data: profileRows } = creatorIds.length
+    ? await service.from("profiles").select("id, full_name").in("id", creatorIds)
+    : { data: [] as { id: string; full_name: string }[] };
+  const nameMap = new Map<string, string>();
+  (profileRows ?? []).forEach((p: { id: string; full_name: string }) => nameMap.set(p.id, p.full_name));
 
   return (
     <div className="space-y-6">
@@ -24,8 +32,8 @@ export default async function NotesPage() {
 
       {notes?.length ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {notes.map((n) => {
-            const author = (n as unknown as { profile: { full_name: string } | null }).profile?.full_name ?? "?";
+          {(notes as { id: string; title: string; content: string; created_by: string; created_at: string }[]).map((n) => {
+            const author = nameMap.get(n.created_by) ?? "Anggota";
             const canDelete = ctx.userId === n.created_by || ctx.isAdmin;
             return (
               <div key={n.id} className="card border-yellow-200 bg-yellow-50">

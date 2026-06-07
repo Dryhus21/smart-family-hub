@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { requireFamily, logActivity } from "@/lib/auth";
 
 export type ActionResult = { error?: string; success?: string };
@@ -13,8 +13,8 @@ export async function createNoteAction(_prev: ActionResult, formData: FormData):
   if (!title) return { error: "Judul wajib diisi" };
   if (!content) return { error: "Isi catatan wajib diisi" };
 
-  const supabase = await createClient();
-  const { data, error } = await supabase
+  const service = createServiceClient();
+  const { data, error } = await service
     .from("notes")
     .insert({ family_id: ctx.family.id, title, content, created_by: ctx.userId })
     .select()
@@ -30,9 +30,11 @@ export async function createNoteAction(_prev: ActionResult, formData: FormData):
 export async function deleteNoteAction(formData: FormData): Promise<void> {
   const ctx = await requireFamily();
   const id = String(formData.get("id"));
-  const supabase = await createClient();
-  const { data: n } = await supabase.from("notes").select("title").eq("id", id).single();
-  await supabase.from("notes").delete().eq("id", id);
-  await logActivity({ familyId: ctx.family.id, actorId: ctx.userId, action: "delete_note", entityType: "note", entityId: id, metadata: { title: n?.title } });
+  const service = createServiceClient();
+  const { data: n } = await service.from("notes").select("title, family_id, created_by").eq("id", id).single();
+  if (!n || n.family_id !== ctx.family.id) return;
+  if (n.created_by !== ctx.userId && !ctx.isAdmin) return;
+  await service.from("notes").delete().eq("id", id);
+  await logActivity({ familyId: ctx.family.id, actorId: ctx.userId, action: "delete_note", entityType: "note", entityId: id, metadata: { title: n.title } });
   revalidatePath("/notes");
 }

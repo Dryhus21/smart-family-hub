@@ -1,20 +1,23 @@
 import { requireFamily } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { formatDateShortID } from "@/lib/utils";
 import FamilyClient from "./client";
 import { removeMemberAction, revokeInviteAction } from "./actions";
 
 export default async function FamilyPage() {
   const ctx = await requireFamily();
-  const supabase = await createClient();
-  const [{ data: members }, { data: invites }] = await Promise.all([
-    supabase
+  // Service client bypasses RLS so we can fetch member profiles reliably.
+  // Authorization is enforced by requireFamily() above (user is in this family).
+  const service = createServiceClient();
+
+  const [{ data: memberRows }, { data: invites }] = await Promise.all([
+    service
       .from("family_members")
-      .select("id, user_id, role, joined_at, profile:profiles(id, full_name, email)")
+      .select("id, user_id, role, joined_at")
       .eq("family_id", ctx.family.id)
       .order("joined_at"),
     ctx.isAdmin
-      ? supabase
+      ? service
           .from("family_invitations")
           .select("*")
           .eq("family_id", ctx.family.id)
@@ -22,6 +25,21 @@ export default async function FamilyPage() {
           .order("created_at", { ascending: false })
       : Promise.resolve({ data: [] as { id: string; email: string; token: string; created_at: string }[] }),
   ]);
+
+  const userIds = (memberRows ?? []).map((m: { user_id: string }) => m.user_id);
+  const { data: profileRows } = userIds.length
+    ? await service.from("profiles").select("id, full_name, email").in("id", userIds)
+    : { data: [] as { id: string; full_name: string; email: string }[] };
+
+  const profileMap = new Map<string, { full_name: string; email: string }>();
+  (profileRows ?? []).forEach((p: { id: string; full_name: string; email: string }) => {
+    profileMap.set(p.id, { full_name: p.full_name, email: p.email });
+  });
+
+  const members = (memberRows ?? []).map((m: { id: string; user_id: string; role: string; joined_at: string }) => ({
+    ...m,
+    profile: profileMap.get(m.user_id) ?? { full_name: "(profil tidak ditemukan)", email: "" },
+  }));
 
   return (
     <div className="space-y-6">
@@ -33,9 +51,9 @@ export default async function FamilyPage() {
       {ctx.isAdmin && <FamilyClient family={ctx.family} />}
 
       <section className="card">
-        <h2 className="mb-4 font-semibold text-slate-900">Anggota Keluarga ({members?.length ?? 0})</h2>
+        <h2 className="mb-4 font-semibold text-slate-900">Anggota Keluarga ({members.length})</h2>
         <ul className="divide-y divide-slate-100">
-          {(members as unknown as { id: string; user_id: string; role: string; joined_at: string; profile: { full_name: string; email: string } }[])?.map((m) => (
+          {members.map((m) => (
             <li key={m.id} className="flex items-center justify-between py-3">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 font-semibold text-indigo-700">
@@ -68,7 +86,7 @@ export default async function FamilyPage() {
         <section className="card">
           <h2 className="mb-4 font-semibold text-slate-900">Undangan Tertunda ({invites.length})</h2>
           <ul className="divide-y divide-slate-100">
-            {invites.map((inv) => (
+            {invites.map((inv: { id: string; email: string; token: string }) => (
               <li key={inv.id} className="flex items-center justify-between gap-2 py-3">
                 <div>
                   <div className="font-medium text-slate-900">{inv.email}</div>

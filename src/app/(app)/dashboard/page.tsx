@@ -2,7 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { getAuthContextWithDebug } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { formatDateShortID, formatTimeID, daysUntil } from "@/lib/utils";
 import { TASK_STATUS_LABEL } from "@/lib/types";
 import { createFamilyAction, joinByTokenAction } from "../../onboarding/actions";
@@ -102,7 +102,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   }
 
   const ctx = auth as typeof auth & { family: NonNullable<typeof auth.family>; membership: NonNullable<typeof auth.membership> };
-  const supabase = await createClient();
+  const service = createServiceClient();
   const today = new Date().toISOString().slice(0, 10);
 
   const [
@@ -112,11 +112,11 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     { data: recentNotes },
     { data: dueSoonTasks },
   ] = await Promise.all([
-    supabase.from("family_members").select("*", { count: "exact", head: true }).eq("family_id", ctx.family.id),
-    supabase.from("events").select("*").eq("family_id", ctx.family.id).gte("event_date", today).order("event_date").limit(5),
-    supabase.from("tasks").select("*").eq("family_id", ctx.family.id).neq("status", "selesai").order("deadline", { ascending: true, nullsFirst: false }).limit(5),
-    supabase.from("notes").select("*").eq("family_id", ctx.family.id).order("created_at", { ascending: false }).limit(3),
-    supabase.from("tasks").select("*").eq("family_id", ctx.family.id).neq("status", "selesai").not("deadline", "is", null).lte("deadline", new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10)),
+    service.from("family_members").select("*", { count: "exact", head: true }).eq("family_id", ctx.family.id),
+    service.from("events").select("*").eq("family_id", ctx.family.id).gte("event_date", today).order("event_date").limit(5),
+    service.from("tasks").select("*").eq("family_id", ctx.family.id).neq("status", "selesai").order("deadline", { ascending: true, nullsFirst: false }).limit(5),
+    service.from("notes").select("*").eq("family_id", ctx.family.id).order("created_at", { ascending: false }).limit(3),
+    service.from("tasks").select("*").eq("family_id", ctx.family.id).neq("status", "selesai").not("deadline", "is", null).lte("deadline", new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10)),
   ]);
 
   const reminders: { kind: string; title: string; date: string; href: string }[] = [];

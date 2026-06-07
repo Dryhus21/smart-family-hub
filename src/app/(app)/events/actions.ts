@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { requireFamily, logActivity } from "@/lib/auth";
 
 export type ActionResult = { error?: string; success?: string };
@@ -16,8 +16,8 @@ export async function createEventAction(_prev: ActionResult, formData: FormData)
   if (!title) return { error: "Judul acara wajib diisi" };
   if (!event_date) return { error: "Tanggal acara wajib diisi" };
 
-  const supabase = await createClient();
-  const { data, error } = await supabase
+  const service = createServiceClient();
+  const { data, error } = await service
     .from("events")
     .insert({ family_id: ctx.family.id, title, event_date, event_time, location, description, created_by: ctx.userId })
     .select()
@@ -34,10 +34,13 @@ export async function createEventAction(_prev: ActionResult, formData: FormData)
 export async function deleteEventAction(formData: FormData): Promise<void> {
   const ctx = await requireFamily();
   const id = String(formData.get("id"));
-  const supabase = await createClient();
-  const { data: ev } = await supabase.from("events").select("title").eq("id", id).single();
-  await supabase.from("events").delete().eq("id", id);
-  await logActivity({ familyId: ctx.family.id, actorId: ctx.userId, action: "delete_event", entityType: "event", entityId: id, metadata: { title: ev?.title } });
+  const service = createServiceClient();
+  const { data: ev } = await service.from("events").select("title, family_id, created_by").eq("id", id).single();
+  if (!ev || ev.family_id !== ctx.family.id) return;
+  // Only creator or admin can delete
+  if (ev.created_by !== ctx.userId && !ctx.isAdmin) return;
+  await service.from("events").delete().eq("id", id);
+  await logActivity({ familyId: ctx.family.id, actorId: ctx.userId, action: "delete_event", entityType: "event", entityId: id, metadata: { title: ev.title } });
   revalidatePath("/events");
   revalidatePath("/calendar");
   revalidatePath("/dashboard");

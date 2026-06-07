@@ -1,5 +1,5 @@
 import { requireFamily } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 
 const ACTION_LABEL: Record<string, string> = {
   create_family: "membuat keluarga",
@@ -28,13 +28,21 @@ function relTime(iso: string) {
 
 export default async function ActivityPage() {
   const ctx = await requireFamily();
-  const supabase = await createClient();
-  const { data: logs } = await supabase
+  const service = createServiceClient();
+
+  const { data: logs } = await service
     .from("activity_logs")
-    .select("*, actor:profiles(full_name)")
+    .select("*")
     .eq("family_id", ctx.family.id)
     .order("created_at", { ascending: false })
     .limit(100);
+
+  const actorIds = Array.from(new Set((logs ?? []).map((l: { actor_id: string | null }) => l.actor_id).filter(Boolean))) as string[];
+  const { data: actorRows } = actorIds.length
+    ? await service.from("profiles").select("id, full_name").in("id", actorIds)
+    : { data: [] as { id: string; full_name: string }[] };
+  const actorMap = new Map<string, string>();
+  (actorRows ?? []).forEach((a: { id: string; full_name: string }) => actorMap.set(a.id, a.full_name));
 
   return (
     <div className="space-y-6">
@@ -43,10 +51,10 @@ export default async function ActivityPage() {
         <p className="mt-1 text-sm text-slate-600">100 aktivitas terbaru keluarga.</p>
       </div>
       <div className="card">
-        {logs?.length ? (
+        {logs && logs.length ? (
           <ul className="divide-y divide-slate-100">
-            {(logs as unknown as { id: string; actor: { full_name: string } | null; action: string; metadata: Record<string, unknown> | null; created_at: string }[]).map((l) => {
-              const name = l.actor?.full_name ?? "Seseorang";
+            {(logs as { id: string; actor_id: string | null; action: string; metadata: Record<string, unknown> | null; created_at: string }[]).map((l) => {
+              const name = l.actor_id ? actorMap.get(l.actor_id) ?? "Seseorang" : "Seseorang";
               const action = ACTION_LABEL[l.action] ?? l.action;
               const detail = (l.metadata && (l.metadata.title || l.metadata.name || l.metadata.email)) ?? "";
               return (
@@ -57,7 +65,7 @@ export default async function ActivityPage() {
                   <div className="flex-1">
                     <div className="text-sm text-slate-900">
                       <strong>{name}</strong> {action}
-                      {detail ? <> "<em>{String(detail)}</em>"</> : null}
+                      {detail ? <> &quot;<em>{String(detail)}</em>&quot;</> : null}
                     </div>
                     <div className="text-xs text-slate-500">{relTime(l.created_at)}</div>
                   </div>

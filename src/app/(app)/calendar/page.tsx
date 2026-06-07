@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireFamily } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { formatTimeID } from "@/lib/utils";
 
 export default async function CalendarPage({ searchParams }: { searchParams: Promise<{ m?: string; y?: string }> }) {
@@ -15,9 +15,9 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
   const startWeekday = first.getDay();
   const daysInMonth = last.getDate();
 
-  const supabase = await createClient();
+  const service = createServiceClient();
   const monthStr = `${year}-${String(month + 1).padStart(2, "0")}`;
-  const { data: events } = await supabase
+  const { data: events } = await service
     .from("events")
     .select("*")
     .eq("family_id", ctx.family.id)
