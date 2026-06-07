@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatDateShortID, formatTimeID, daysUntil } from "@/lib/utils";
 import { TASK_STATUS_LABEL } from "@/lib/types";
-import OnboardingForms from "../../onboarding/forms";
+import OnboardingPanel from "./onboarding-panel";
 
 export default async function DashboardPage() {
   const auth = await getAuthContext();
@@ -18,7 +18,7 @@ export default async function DashboardPage() {
           <h1 className="text-2xl font-bold text-slate-900">Halo, {auth.profile.full_name}!</h1>
           <p className="mt-1 text-sm text-slate-600">Untuk memulai, buat keluarga baru atau gabung dengan kode undangan.</p>
         </div>
-        <OnboardingForms />
+        <OnboardingPanel />
       </div>
     );
   }
