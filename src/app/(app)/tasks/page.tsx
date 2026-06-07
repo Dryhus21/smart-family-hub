@@ -2,6 +2,7 @@ import { requireFamily } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/server";
 import { formatDateShortID, daysUntil } from "@/lib/utils";
 import { TASK_STATUS_LABEL, type TaskStatus } from "@/lib/types";
+import { SubmitButton } from "@/components/SubmitButton";
 import TaskForm from "./form";
 import { updateTaskStatusAction, deleteTaskAction } from "./actions";
 
@@ -85,15 +86,15 @@ export default async function TasksPage() {
                           <form action={updateTaskStatusAction}>
                             <input type="hidden" name="id" value={t.id} />
                             <input type="hidden" name="status" value={STATUS_FLOW[t.status as TaskStatus]} />
-                            <button className="btn btn-secondary text-xs" type="submit">
+                            <SubmitButton className="btn btn-secondary text-xs" pendingLabel="Mengubah...">
                               → {TASK_STATUS_LABEL[STATUS_FLOW[t.status as TaskStatus]]}
-                            </button>
+                            </SubmitButton>
                           </form>
                         )}
                         {canDelete && (
                           <form action={deleteTaskAction}>
                             <input type="hidden" name="id" value={t.id} />
-                            <button className="btn btn-ghost text-xs text-red-600 hover:bg-red-50" type="submit">Hapus</button>
+                            <SubmitButton className="btn btn-ghost text-xs text-red-600 hover:bg-red-50" pendingLabel="Menghapus...">Hapus</SubmitButton>
                           </form>
                         )}
                       </div>

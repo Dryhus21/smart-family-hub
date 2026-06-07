@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createServiceClient } from "@/lib/supabase/server";
 import { formatDateShortID, formatTimeID, daysUntil } from "@/lib/utils";
 import { TASK_STATUS_LABEL } from "@/lib/types";
+import { SubmitButton } from "@/components/SubmitButton";
 import { createFamilyAction, joinByTokenAction } from "../../onboarding/actions";
 
 export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ mode?: string; err?: string; debug?: string }> }) {
@@ -83,7 +84,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 <label className="label" htmlFor="description">Deskripsi (opsional)</label>
                 <textarea className="input min-h-24" id="description" name="description" placeholder="Ceritakan singkat tentang keluarga Anda" />
               </div>
-              <button className="btn btn-primary" type="submit">Buat Keluarga</button>
+              <SubmitButton className="btn btn-primary" pendingLabel="Membuat keluarga...">Buat Keluarga</SubmitButton>
               <p className="text-xs text-slate-500">Anda akan otomatis menjadi Admin keluarga ini.</p>
             </form>
           ) : (
@@ -93,7 +94,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 <input className="input font-mono" id="token" name="token" type="text" placeholder="Tempel kode undangan di sini" required />
                 <p className="mt-1 text-xs text-slate-500">Kode didapat dari admin keluarga setelah mereka mengundang email Anda.</p>
               </div>
-              <button className="btn btn-primary" type="submit">Gabung Keluarga</button>
+              <SubmitButton className="btn btn-primary" pendingLabel="Memproses...">Gabung Keluarga</SubmitButton>
             </form>
           )}
         </div>

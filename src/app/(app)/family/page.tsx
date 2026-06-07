@@ -1,6 +1,7 @@
 import { requireFamily } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/server";
 import { formatDateShortID } from "@/lib/utils";
+import { SubmitButton } from "@/components/SubmitButton";
 import FamilyClient from "./client";
 import { removeMemberAction, revokeInviteAction } from "./actions";
 
@@ -73,7 +74,7 @@ export default async function FamilyPage() {
                 {ctx.isAdmin && m.user_id !== ctx.userId && (
                   <form action={removeMemberAction}>
                     <input type="hidden" name="user_id" value={m.user_id} />
-                    <button className="text-xs text-red-600 hover:underline" type="submit">Keluarkan</button>
+                    <SubmitButton className="text-xs text-red-600 hover:underline" pendingLabel="...">Keluarkan</SubmitButton>
                   </form>
                 )}
               </div>
@@ -94,7 +95,7 @@ export default async function FamilyPage() {
                 </div>
                 <form action={revokeInviteAction}>
                   <input type="hidden" name="id" value={inv.id} />
-                  <button className="text-xs text-red-600 hover:underline" type="submit">Batalkan</button>
+                  <SubmitButton className="text-xs text-red-600 hover:underline" pendingLabel="...">Batalkan</SubmitButton>
                 </form>
               </li>
             ))}

@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import type { Family, FamilyMember, Profile } from "@/lib/types";
@@ -115,10 +116,13 @@ export async function getAuthContextWithDebug(): Promise<{ ctx: AuthContext | nu
   return { ctx, debug };
 }
 
-export async function getAuthContext(): Promise<AuthContext | null> {
+// React cache() dedupes calls within a single request render — multiple
+// pages/components calling getAuthContext during one navigation will share
+// a single Supabase round-trip instead of doing it once per component.
+export const getAuthContext = cache(async (): Promise<AuthContext | null> => {
   const { ctx } = await getAuthContextWithDebug();
   return ctx;
-}
+});
 
 export async function requireAuth(): Promise<AuthContext> {
   const ctx = await getAuthContext();

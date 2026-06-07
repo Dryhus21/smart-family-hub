@@ -1,6 +1,7 @@
 import { requireFamily } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/server";
 import { formatDateID, formatTimeID } from "@/lib/utils";
+import { SubmitButton } from "@/components/SubmitButton";
 import EventForm from "./form";
 import { deleteEventAction } from "./actions";
 
@@ -64,7 +65,7 @@ export default async function EventsPage() {
                 {(ctx.userId === e.created_by || ctx.isAdmin) && (
                   <form action={deleteEventAction}>
                     <input type="hidden" name="id" value={e.id} />
-                    <button className="btn btn-ghost text-red-600 hover:bg-red-50" type="submit">Hapus</button>
+                    <SubmitButton className="btn btn-ghost text-red-600 hover:bg-red-50" pendingLabel="Menghapus...">Hapus</SubmitButton>
                   </form>
                 )}
               </li>
@@ -88,7 +89,7 @@ export default async function EventsPage() {
                 {(ctx.userId === e.created_by || ctx.isAdmin) && (
                   <form action={deleteEventAction}>
                     <input type="hidden" name="id" value={e.id} />
-                    <button className="btn btn-ghost text-red-600 hover:bg-red-50 text-xs" type="submit">Hapus</button>
+                    <SubmitButton className="btn btn-ghost text-red-600 hover:bg-red-50 text-xs" pendingLabel="Menghapus...">Hapus</SubmitButton>
                   </form>
                 )}
               </li>

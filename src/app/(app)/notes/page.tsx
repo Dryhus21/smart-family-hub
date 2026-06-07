@@ -1,6 +1,7 @@
 import { requireFamily } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/server";
 import { formatDateShortID } from "@/lib/utils";
+import { SubmitButton } from "@/components/SubmitButton";
 import NoteForm from "./form";
 import { deleteNoteAction } from "./actions";
 
@@ -42,7 +43,7 @@ export default async function NotesPage() {
                   {canDelete && (
                     <form action={deleteNoteAction}>
                       <input type="hidden" name="id" value={n.id} />
-                      <button className="text-xs text-red-600 hover:underline" type="submit">Hapus</button>
+                      <SubmitButton className="text-xs text-red-600 hover:underline" pendingLabel="...">Hapus</SubmitButton>
                     </form>
                   )}
                 </div>
