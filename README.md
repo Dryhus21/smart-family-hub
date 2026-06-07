@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Smart Family Hub
 
-## Getting Started
+Platform manajemen keluarga berbasis web - kalender, tugas rumah tangga, catatan, dan dashboard aktivitas keluarga.
 
-First, run the development server:
+Dibangun untuk SRS v1.0 oleh Dryhus Dzacky Damingtyas.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Stack
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Frontend**: Next.js 16 (App Router) + TypeScript + Tailwind CSS v4
+- **Backend**: Supabase (PostgreSQL + Auth)
+- **Deploy**: Vercel
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Setup Lokal
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-## Learn More
+2. Copy `.env.example` ke `.env.local` dan isi dengan kredensial Supabase Anda.
 
-To learn more about Next.js, take a look at the following resources:
+3. Apply database schema:
+   - Buka Supabase Dashboard -> SQL Editor -> New query
+   - Copy isi `supabase/schema.sql` -> Paste -> Run
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+4. Jalankan dev server:
+   ```bash
+   npm run dev
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+   Buka [http://localhost:3000](http://localhost:3000).
 
-## Deploy on Vercel
+## Fitur (FR-01 s/d FR-14)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- FR-01/02/14: Registrasi, Login, Logout
+- FR-03: Buat keluarga (otomatis jadi Admin)
+- FR-04: Undang anggota via email (kode undangan)
+- FR-05: Edit profil keluarga (Admin)
+- FR-06/07: Manajemen acara + kalender bulanan interaktif
+- FR-08/09: Tugas rumah tangga (Kanban: Belum Dimulai - Sedang Dikerjakan - Selesai)
+- FR-10: Catatan keluarga bersama
+- FR-11: Pengingat acara & deadline tugas di dashboard
+- FR-12: Dashboard ringkasan
+- FR-13: Riwayat aktivitas keluarga (100 terbaru)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deploy ke Vercel
+
+1. Push repo ini ke GitHub
+2. Import di [vercel.com/new](https://vercel.com/new)
+3. Set environment variables (sama persis dengan `.env.local`):
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+4. Deploy
+
+## Lisensi
+
+Educational project - 2026
