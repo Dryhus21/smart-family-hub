@@ -44,13 +44,11 @@ export default async function TasksPage() {
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Tugas Rumah Tangga</h1>
         <p className="mt-1 text-sm text-slate-600">
-          {ctx.isAdmin
-            ? "Sebagai Admin, Anda dapat membuat, menugaskan, dan menghapus tugas. Anggota dapat mengubah status tugas yang ditugaskan kepada mereka."
-            : "Anda dapat mengubah status tugas yang ditugaskan kepada Anda."}
+          Semua anggota dapat menambahkan dan mengubah status tugas. Hanya pembuat tugas atau admin yang dapat menghapus.
         </p>
       </div>
 
-      {ctx.isAdmin && <TaskForm members={memberList.map(({ id, name }) => ({ id, name }))} />}
+      <TaskForm members={memberList.map(({ id, name }) => ({ id, name }))} />
 
       <div className="grid gap-4 md:grid-cols-3">
         {columns.map((col) => {
@@ -62,10 +60,11 @@ export default async function TasksPage() {
                 <span className="badge bg-white text-slate-700">{items.length}</span>
               </div>
               <div className="space-y-2">
-                {items.map((t: { id: string; task_name: string; description: string | null; assigned_to: string | null; status: TaskStatus; deadline: string | null }) => {
+                {items.map((t: { id: string; task_name: string; description: string | null; assigned_to: string | null; status: TaskStatus; deadline: string | null; created_by: string }) => {
                   const assigneeName = t.assigned_to ? profileMap.get(t.assigned_to) ?? "?" : "Belum ditugaskan";
                   const overdue = t.deadline && daysUntil(t.deadline) < 0 && t.status !== "selesai";
-                  const canChange = ctx.isAdmin || t.assigned_to === ctx.userId;
+                  const canChange = ctx.isAdmin || t.assigned_to === ctx.userId || t.created_by === ctx.userId;
+                  const canDelete = ctx.isAdmin || t.created_by === ctx.userId;
                   return (
                     <div key={t.id} className="rounded-lg bg-white p-3 shadow-sm">
                       <div className="font-medium text-slate-900">{t.task_name}</div>
@@ -78,6 +77,9 @@ export default async function TasksPage() {
                           </span>
                         )}
                       </div>
+                      <div className="mt-1 text-[11px] text-slate-500">
+                        Dibuat oleh: {profileMap.get(t.created_by) ?? "Anggota"}{t.created_by === ctx.userId ? " (Anda)" : ""}
+                      </div>
                       <div className="mt-3 flex gap-2">
                         {canChange && (
                           <form action={updateTaskStatusAction}>
@@ -88,7 +90,7 @@ export default async function TasksPage() {
                             </button>
                           </form>
                         )}
-                        {ctx.isAdmin && (
+                        {canDelete && (
                           <form action={deleteTaskAction}>
                             <input type="hidden" name="id" value={t.id} />
                             <button className="btn btn-ghost text-xs text-red-600 hover:bg-red-50" type="submit">Hapus</button>

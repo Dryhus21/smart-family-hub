@@ -2,13 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { createServiceClient } from "@/lib/supabase/server";
-import { requireAdmin, requireFamily, logActivity } from "@/lib/auth";
+import { requireFamily, logActivity } from "@/lib/auth";
 import type { TaskStatus } from "@/lib/types";
 
 export type ActionResult = { error?: string; success?: string };
 
+// Semua anggota keluarga (admin & member) bisa membuat tugas
 export async function createTaskAction(_prev: ActionResult, formData: FormData): Promise<ActionResult> {
-  const ctx = await requireAdmin();
+  const ctx = await requireFamily();
   const task_name = String(formData.get("task_name") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim() || null;
   const assigned_to = String(formData.get("assigned_to") ?? "") || null;
@@ -61,13 +62,27 @@ export async function updateTaskStatusAction(formData: FormData): Promise<void> 
   revalidatePath("/dashboard");
 }
 
+// Pembuat tugas atau admin bisa hapus
 export async function deleteTaskAction(formData: FormData): Promise<void> {
-  const ctx = await requireAdmin();
+  const ctx = await requireFamily();
   const id = String(formData.get("id"));
   const service = createServiceClient();
-  const { data: t } = await service.from("tasks").select("task_name").eq("id", id).single();
+  const { data: t } = await service
+    .from("tasks")
+    .select("task_name, family_id, created_by")
+    .eq("id", id)
+    .single();
+  if (!t || t.family_id !== ctx.family.id) return;
+  if (t.created_by !== ctx.userId && !ctx.isAdmin) return;
   await service.from("tasks").delete().eq("id", id);
-  await logActivity({ familyId: ctx.family.id, actorId: ctx.userId, action: "delete_task", entityType: "task", entityId: id, metadata: { name: t?.task_name } });
+  await logActivity({
+    familyId: ctx.family.id,
+    actorId: ctx.userId,
+    action: "delete_task",
+    entityType: "task",
+    entityId: id,
+    metadata: { name: t.task_name },
+  });
   revalidatePath("/tasks");
   revalidatePath("/dashboard");
 }
