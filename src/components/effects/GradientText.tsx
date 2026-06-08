@@ -16,7 +16,7 @@ type Props = {
 export default function GradientText({
   children,
   className = "",
-  colors = ["#c0c1ff", "#a855f7", "#2fd9f4", "#c0c1ff"],
+  colors = ["#2f5b78", "#5291b3", "#8b6f53", "#2f5b78"],
   animationSpeed = 6,
   direction = "horizontal",
   pauseOnHover = false,

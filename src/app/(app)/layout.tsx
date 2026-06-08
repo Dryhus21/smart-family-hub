@@ -55,16 +55,26 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
+      {/* Soft background bends across app */}
+      <div
+        className="pointer-events-none fixed inset-0 -z-10"
+        style={{
+          background:
+            "radial-gradient(ellipse 40% 35% at 90% 10%, rgba(243,227,208,0.45), transparent 70%), radial-gradient(ellipse 40% 35% at 10% 95%, rgba(210,196,180,0.4), transparent 70%)",
+        }}
+        aria-hidden
+      />
+
       {/* Desktop Sidebar */}
-      <aside className="fixed left-0 top-0 z-40 hidden h-screen w-[280px] border-r border-neon-border bg-surface-container-low/70 backdrop-blur-xl lg:flex lg:flex-col">
+      <aside className="fixed left-0 top-0 z-40 hidden h-screen w-[280px] border-r border-white/40 bg-glass-bg-strong shadow-[8px_0_30px_-12px_rgba(47,91,120,0.2)] backdrop-blur-xl lg:flex lg:flex-col">
         <div className="flex h-full flex-col gap-6 px-4 py-6">
           {/* Header */}
           <Link href="/dashboard" className="flex items-center gap-3 px-2">
             <Logo size={44} />
             <div className="min-w-0">
-              <h1 className="truncate text-base font-extrabold text-primary tracking-tight">{ctx.family.family_name}</h1>
-              <p className="mt-0.5 text-[11px] tracking-[0.18em] font-semibold text-on-surface-variant uppercase">
+              <h1 className="truncate text-base font-extrabold tracking-tight text-primary">{ctx.family.family_name}</h1>
+              <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-on-surface-variant">
                 Family Hub
               </p>
             </div>
@@ -78,19 +88,19 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </nav>
 
           {/* User card */}
-          <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-surface-container/70 p-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-primary/60 bg-primary-container/30 font-bold text-primary">
+          <div className="flex items-center gap-3 rounded-xl border border-white/70 bg-white/70 p-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-primary/40 bg-primary-strong font-bold text-on-primary">
               {ctx.profile.full_name.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 overflow-hidden">
               <div className="truncate text-sm font-semibold text-on-surface">{ctx.profile.full_name}</div>
-              <div className="truncate text-[11px] font-semibold tracking-wider text-on-surface-variant uppercase">
+              <div className="truncate text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
                 {ctx.isAdmin ? "Admin" : "Anggota"}
               </div>
             </div>
             <form action={logoutAction}>
               <SubmitButton
-                className="rounded-lg p-2 text-on-surface-variant transition hover:bg-white/5 hover:text-danger-red"
+                className="rounded-lg p-2 text-on-surface-variant transition hover:bg-danger-red/10 hover:text-danger-red"
                 pendingLabel=""
               >
                 <Icon name="logout" className="text-base" />
@@ -101,7 +111,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </aside>
 
       {/* Mobile top bar */}
-      <header className="fixed top-0 z-30 flex h-16 w-full items-center justify-between border-b border-white/10 bg-glass-bg px-4 backdrop-blur-lg lg:hidden">
+      <header className="fixed top-0 z-30 flex h-16 w-full items-center justify-between border-b border-white/60 bg-glass-bg-strong px-4 backdrop-blur-lg lg:hidden">
         <Link href="/dashboard" className="flex items-center gap-2">
           <Logo size={32} />
           <span className="text-sm font-extrabold text-primary">{ctx.family.family_name}</span>
@@ -114,7 +124,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </header>
 
       {/* Mobile bottom nav */}
-      <nav className="fixed bottom-3 left-1/2 z-50 flex w-[90%] -translate-x-1/2 items-center justify-around rounded-full border border-white/10 bg-glass-bg p-2 shadow-[0_0_15px_rgba(99,102,241,0.15)] backdrop-blur-lg lg:hidden">
+      <nav className="fixed bottom-3 left-1/2 z-50 flex w-[90%] -translate-x-1/2 items-center justify-around rounded-full border border-white/70 bg-glass-bg-strong p-2 shadow-[0_8px_30px_-8px_rgba(47,91,120,0.35)] backdrop-blur-lg lg:hidden">
         {BOTTOM_NAV.map((n) => (
           <NavBottomLink key={n.href} href={n.href} icon={n.icon} label={n.label} />
         ))}

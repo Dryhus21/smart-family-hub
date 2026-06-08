@@ -15,8 +15,8 @@ export default function RegisterPage() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center px-4 py-12">
-      <DotField />
-      <ColorBends />
+      <ColorBends color="#5291b3" intensity={1.3} />
+      <DotField dotRadius={2.4} dotSpacing={14} cursorRadius={500} cursorForce={0.1} bulgeOnly bulgeStrength={67} glowRadius={160} />
 
       <div className="w-full max-w-md">
         <div className="mb-8 flex justify-center">
@@ -25,13 +25,13 @@ export default function RegisterPage() {
           </Link>
         </div>
 
-        <div className="glass-card neon-card p-8">
+        <div className="glass-card-strong neon-card p-8">
           <h1 className="text-2xl font-extrabold tracking-tight">
-            <GradientText colors={["#c0c1ff", "#ddb7ff", "#c0c1ff"]} animationSpeed={5}>
+            <GradientText colors={["#2f5b78", "#5291b3", "#8b6f53", "#2f5b78"]} animationSpeed={5}>
               Daftar Akun Baru
             </GradientText>
           </h1>
-          <p className="mt-2 text-sm text-on-surface-variant">
+          <p className="mt-2 text-sm text-on-surface/80">
             Buat akun untuk mulai mengelola keluarga Anda dengan cerdas.
           </p>
 
