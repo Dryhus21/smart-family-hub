@@ -1,100 +1,94 @@
 import Link from "next/link";
-import { cookies } from "next/headers";
-import { getAuthContextWithDebug } from "@/lib/auth";
+import { getAuthContext } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { createServiceClient } from "@/lib/supabase/server";
 import { formatDateShortID, formatTimeID, daysUntil } from "@/lib/utils";
 import { TASK_STATUS_LABEL } from "@/lib/types";
 import { SubmitButton } from "@/components/SubmitButton";
+import { Icon } from "@/components/Icon";
 import { createFamilyAction, joinByTokenAction } from "../../onboarding/actions";
 
-export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ mode?: string; err?: string; debug?: string }> }) {
-  const { ctx: auth, debug } = await getAuthContextWithDebug();
+export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ mode?: string; err?: string }> }) {
+  const auth = await getAuthContext();
   const sp = await searchParams;
 
   if (!auth) {
-    const cookieStore = await cookies();
-    const sbCookies = cookieStore.getAll().filter((c) => c.name.startsWith("sb-")).map((c) => c.name);
-    const showDebug = sp.debug === "1";
     return (
       <div className="mx-auto max-w-lg py-12 text-center">
-        <div className="card">
-          <h1 className="text-xl font-bold text-slate-900">Sesi Berakhir</h1>
-          <p className="mt-2 text-sm text-slate-600">Silakan login kembali untuk melanjutkan.</p>
-          <Link href="/login" className="btn btn-primary mt-6 inline-block">Masuk</Link>
-          <div className="mt-4 text-xs">
-            <Link href="/dashboard?debug=1" className="text-slate-500 underline">Tampilkan info debug</Link>
-          </div>
-          {showDebug && (
-            <div className="mt-4 rounded-lg bg-slate-100 p-3 text-left text-xs text-slate-700">
-              <div><strong>hasSession:</strong> {String(debug.hasSession)}</div>
-              <div><strong>sessionUserId:</strong> {debug.sessionUserId ?? "null"}</div>
-              <div><strong>hasUser:</strong> {String(debug.hasUser)}</div>
-              <div><strong>userId:</strong> {debug.userId ?? "null"}</div>
-              <div><strong>userError:</strong> {debug.userError ?? "null"}</div>
-              <div><strong>profileFound:</strong> {String(debug.profileFound)}</div>
-              <div><strong>profileError:</strong> {debug.profileError ?? "null"}</div>
-              <div><strong>serviceKeyPresent:</strong> {String(debug.serviceKeyPresent)}</div>
-              <div><strong>sb-cookies:</strong> {sbCookies.length ? sbCookies.join(", ") : "(none)"}</div>
-            </div>
-          )}
+        <div className="glass-card neon-card p-8">
+          <Icon name="lock_clock" className="text-4xl text-primary" />
+          <h1 className="mt-3 text-xl font-extrabold">Sesi Berakhir</h1>
+          <p className="mt-2 text-sm text-on-surface-variant">Silakan login kembali untuk melanjutkan.</p>
+          <Link href="/login" className="btn btn-primary mt-6 inline-flex px-6 py-3">
+            <Icon name="login" className="text-base" /> Masuk
+          </Link>
         </div>
       </div>
     );
   }
 
-  // No family yet — show onboarding inline (no extra redirect needed).
   if (!auth.family || !auth.membership) {
     const mode = sp.mode === "join" ? "join" : "create";
     const errorMsg = sp.err ? decodeURIComponent(sp.err) : null;
     return (
       <div className="py-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-slate-900">Halo, {auth.profile.full_name}!</h1>
-          <p className="mt-1 text-sm text-slate-600">Untuk memulai, buat keluarga baru atau gabung dengan kode undangan.</p>
+        <div className="mb-6 text-center">
+          <h1 className="text-display-lg-mobile">Halo, <span className="text-gradient">{auth.profile.full_name}!</span></h1>
+          <p className="mt-2 text-on-surface-variant">Untuk memulai, buat keluarga baru atau gabung dengan kode undangan.</p>
         </div>
 
-        <div className="card">
-          <div className="mb-6 flex gap-2 border-b border-slate-200">
+        <div className="glass-card neon-card mx-auto max-w-2xl p-6">
+          <div className="mb-6 flex gap-2 rounded-lg border border-white/10 bg-surface-container-low p-1">
             <Link
               href="/dashboard?mode=create"
-              className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium ${mode === "create" ? "border-indigo-600 text-indigo-600" : "border-transparent text-slate-500"}`}
+              className={`flex-1 rounded-md px-4 py-2 text-center text-sm font-semibold transition ${
+                mode === "create" ? "bg-primary text-on-primary shadow-[0_0_20px_rgba(99,102,241,0.5)]" : "text-on-surface-variant hover:text-on-surface"
+              }`}
             >
               Buat Keluarga Baru
             </Link>
             <Link
               href="/dashboard?mode=join"
-              className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium ${mode === "join" ? "border-indigo-600 text-indigo-600" : "border-transparent text-slate-500"}`}
+              className={`flex-1 rounded-md px-4 py-2 text-center text-sm font-semibold transition ${
+                mode === "join" ? "bg-primary text-on-primary shadow-[0_0_20px_rgba(99,102,241,0.5)]" : "text-on-surface-variant hover:text-on-surface"
+              }`}
             >
               Gabung dengan Kode
             </Link>
           </div>
 
           {errorMsg && (
-            <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{errorMsg}</div>
+            <div className="mb-4 flex items-start gap-2 rounded-lg border border-danger-red/40 bg-danger-red/10 px-3 py-2 text-sm text-danger-red">
+              <Icon name="error" className="text-base" />
+              <span>{errorMsg}</span>
+            </div>
           )}
 
           {mode === "create" ? (
             <form action={createFamilySubmit} className="space-y-4">
               <div>
                 <label className="label" htmlFor="family_name">Nama Keluarga</label>
-                <input className="input" id="family_name" name="family_name" type="text" placeholder="Keluarga Santoso" required />
+                <input className="input" id="family_name" name="family_name" type="text" placeholder="Keluarga Damingtyas" required />
               </div>
               <div>
                 <label className="label" htmlFor="description">Deskripsi (opsional)</label>
                 <textarea className="input min-h-24" id="description" name="description" placeholder="Ceritakan singkat tentang keluarga Anda" />
               </div>
-              <SubmitButton className="btn btn-primary" pendingLabel="Membuat keluarga...">Buat Keluarga</SubmitButton>
-              <p className="text-xs text-slate-500">Anda akan otomatis menjadi Admin keluarga ini.</p>
+              <SubmitButton className="btn btn-primary w-full py-3" pendingLabel="Membuat keluarga...">
+                <Icon name="add_home" className="text-base" /> Buat Keluarga
+              </SubmitButton>
+              <p className="text-center text-xs text-on-surface-variant">Anda akan otomatis menjadi <strong className="text-primary">Admin</strong> keluarga ini.</p>
             </form>
           ) : (
             <form action={joinSubmit} className="space-y-4">
               <div>
                 <label className="label" htmlFor="token">Kode Undangan</label>
                 <input className="input font-mono" id="token" name="token" type="text" placeholder="Tempel kode undangan di sini" required />
-                <p className="mt-1 text-xs text-slate-500">Kode didapat dari admin keluarga setelah mereka mengundang email Anda.</p>
+                <p className="mt-1.5 text-xs text-on-surface-variant">Kode didapat dari admin keluarga setelah mereka mengundang email Anda.</p>
               </div>
-              <SubmitButton className="btn btn-primary" pendingLabel="Memproses...">Gabung Keluarga</SubmitButton>
+              <SubmitButton className="btn btn-primary w-full py-3" pendingLabel="Memproses...">
+                <Icon name="login" className="text-base" /> Gabung Keluarga
+              </SubmitButton>
             </form>
           )}
         </div>
@@ -121,138 +115,190 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   ]);
 
   const reminders: { kind: string; title: string; date: string; href: string }[] = [];
-  upcomingEvents?.slice(0, 3).forEach((e) => {
+  upcomingEvents?.slice(0, 3).forEach((e: { title: string; event_date: string }) => {
     const d = daysUntil(e.event_date);
-    if (d <= 7) reminders.push({ kind: "event", title: e.title, date: `${d === 0 ? "Hari ini" : d === 1 ? "Besok" : `${d} hari lagi`} - ${formatDateShortID(e.event_date)}`, href: "/events" });
+    if (d <= 7) reminders.push({ kind: "event", title: e.title, date: `${d === 0 ? "Hari ini" : d === 1 ? "Besok" : `${d} hari lagi`} · ${formatDateShortID(e.event_date)}`, href: "/events" });
   });
-  dueSoonTasks?.slice(0, 3).forEach((t) => {
-    const d = daysUntil(t.deadline!);
+  dueSoonTasks?.slice(0, 3).forEach((t: { task_name: string; deadline: string }) => {
+    const d = daysUntil(t.deadline);
     reminders.push({ kind: "task", title: t.task_name, date: `Deadline ${d <= 0 ? "hari ini" : `${d} hari lagi`}`, href: "/tasks" });
   });
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Selamat datang, {ctx.profile.full_name.split(" ")[0]}!</h1>
-        <p className="mt-1 text-sm text-slate-600">Ringkasan aktivitas {ctx.family.family_name}.</p>
+    <div className="space-y-8">
+      {/* Header */}
+      <header className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-display-lg-mobile md:text-display-lg tracking-tight">
+            Selamat datang, <span className="text-gradient">{ctx.profile.full_name.split(" ")[0]}!</span>
+          </h1>
+          <p className="mt-2 text-on-surface-variant">Ringkasan aktivitas {ctx.family.family_name}.</p>
+        </div>
+        <div className="hidden h-10 w-10 items-center justify-center rounded-full border border-primary/60 bg-primary-container/30 font-bold text-primary md:flex">
+          {ctx.profile.full_name.charAt(0).toUpperCase()}
+        </div>
+      </header>
+
+      {/* Stat cards */}
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+        <StatCard label="Anggota Keluarga" value={memberCount ?? 0} icon="group" color="primary" href="/family" hint="Semua Aktif" />
+        <StatCard label="Tugas Aktif" value={activeTasks?.length ?? 0} icon="check_circle" color="tertiary" href="/tasks" hint={`${dueSoonTasks?.length ?? 0} Perlu Perhatian`} />
+        <StatCard label="Acara Mendatang" value={upcomingEvents?.length ?? 0} icon="event_upcoming" color="secondary" href="/events" hint={`${upcomingEvents?.length ?? 0} terjadwal`} />
+        <StatCard label="Catatan Terbaru" value={recentNotes?.length ?? 0} icon="note_alt" color="success-green" href="/notes" hint="Catatan terbaru" />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Anggota Keluarga" value={memberCount ?? 0} icon="👨‍👩‍👧" href="/family" />
-        <StatCard label="Tugas Aktif" value={activeTasks?.length ?? 0} icon="✅" href="/tasks" />
-        <StatCard label="Acara Mendatang" value={upcomingEvents?.length ?? 0} icon="📅" href="/events" />
-        <StatCard label="Catatan Terbaru" value={recentNotes?.length ?? 0} icon="📝" href="/notes" />
-      </div>
-
+      {/* Reminder */}
       {reminders.length > 0 && (
-        <div className="card border-amber-200 bg-amber-50">
+        <div className="glass-card neon-card p-5">
           <div className="mb-3 flex items-center gap-2">
-            <span className="text-lg">🔔</span>
-            <h2 className="font-semibold text-amber-900">Pengingat</h2>
+            <Icon name="notifications_active" className="text-primary" filled />
+            <h2 className="text-headline-md text-primary">Pengingat</h2>
           </div>
-          <div className="space-y-2">
+          <div className="grid gap-2 md:grid-cols-3">
             {reminders.map((r, i) => (
-              <Link key={i} href={r.href} className="flex items-center justify-between rounded-lg bg-white px-3 py-2 hover:bg-amber-100">
-                <div>
-                  <div className="text-sm font-medium text-slate-900">{r.title}</div>
-                  <div className="text-xs text-slate-600">{r.date}</div>
+              <Link key={i} href={r.href} className="group flex items-center justify-between gap-2 rounded-lg border border-white/10 bg-surface-container/60 px-3 py-2 transition hover:border-primary/40 hover:bg-surface-container">
+                <div className="min-w-0">
+                  <div className="truncate text-sm font-semibold text-on-surface">{r.title}</div>
+                  <div className="truncate text-xs text-on-surface-variant">{r.date}</div>
                 </div>
-                <span className="text-xs text-amber-700">{r.kind === "event" ? "Acara" : "Tugas"}</span>
+                <span className={`badge ${r.kind === "event" ? "bg-secondary-container/30 text-secondary" : "bg-tertiary-container/30 text-tertiary"}`}>
+                  {r.kind === "event" ? "Acara" : "Tugas"}
+                </span>
               </Link>
             ))}
           </div>
         </div>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div className="card">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-semibold text-slate-900">Acara Mendatang</h2>
-            <Link href="/events" className="text-sm text-indigo-600 hover:underline">Lihat semua</Link>
+      {/* Two-column main area */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        <section className="lg:col-span-7 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-headline-md">Acara Mendatang</h3>
+            <Link href="/events" className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-primary hover:text-primary-fixed-dim">
+              Lihat Semua <Icon name="arrow_forward" className="text-sm" />
+            </Link>
           </div>
-          {upcomingEvents?.length ? (
-            <ul className="space-y-3">
-              {upcomingEvents.map((e) => (
-                <li key={e.id} className="flex items-start gap-3 rounded-lg border border-slate-100 p-3">
-                  <div className="flex h-12 w-12 flex-shrink-0 flex-col items-center justify-center rounded-lg bg-indigo-50 text-indigo-700">
-                    <div className="text-xs font-medium">{new Date(e.event_date).toLocaleDateString("id-ID", { month: "short" })}</div>
-                    <div className="text-lg font-bold leading-none">{new Date(e.event_date).getDate()}</div>
+
+          {upcomingEvents && upcomingEvents.length > 0 ? (
+            <div className="space-y-3">
+              {(upcomingEvents as { id: string; title: string; event_date: string; event_time: string | null; location: string | null }[]).map((e, i) => (
+                <div key={e.id} className={i === 0 ? "neon-card flex gap-4 bg-surface-container/50 p-5" : "glass-card flex gap-4 p-5"}>
+                  <div className="flex min-w-[60px] flex-col items-center justify-center rounded-lg border border-white/5 bg-surface-container-high p-2">
+                    <span className="text-xs font-bold uppercase text-on-surface-variant">{new Date(e.event_date).toLocaleDateString("id-ID", { month: "short" })}</span>
+                    <span className="text-2xl font-extrabold text-primary">{new Date(e.event_date).getDate()}</span>
                   </div>
                   <div className="flex-1">
-                    <div className="font-medium text-slate-900">{e.title}</div>
-                    <div className="text-xs text-slate-500">
-                      {formatTimeID(e.event_time)} {e.location ? `· ${e.location}` : ""}
+                    <div className="flex items-start justify-between gap-2">
+                      <h4 className="font-bold text-on-surface">{e.title}</h4>
+                      {i === 0 && (
+                        <span className="rounded-full border border-danger-red/30 bg-danger-red/20 px-2 py-0.5 text-[10px] font-bold text-danger-red shadow-[0_0_10px_rgba(239,68,68,0.2)]">
+                          MENDATANG
+                        </span>
+                      )}
+                    </div>
+                    {e.event_time && (
+                      <p className="mt-1 flex items-center gap-1 text-sm text-on-surface-variant">
+                        <Icon name="schedule" className="text-sm" /> {formatTimeID(e.event_time)}
+                      </p>
+                    )}
+                    {e.location && (
+                      <p className="mt-1 flex items-center gap-1 text-sm text-on-surface-variant">
+                        <Icon name="location_on" className="text-sm" /> {e.location}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="glass-card p-6 text-center text-sm text-on-surface-variant">
+              <Icon name="event_busy" className="text-3xl text-on-surface-variant" />
+              <p className="mt-2">Belum ada acara mendatang.</p>
+            </div>
+          )}
+        </section>
+
+        <section className="lg:col-span-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-headline-md">Tugas Aktif</h3>
+            <Link href="/tasks" className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-primary hover:text-primary-fixed-dim">
+              Lihat <Icon name="arrow_forward" className="text-sm" />
+            </Link>
+          </div>
+          <div className="glass-card overflow-hidden">
+            {activeTasks && activeTasks.length > 0 ? (
+              (activeTasks as { id: string; task_name: string; status: string; deadline: string | null }[]).map((t, i) => {
+                const overdue = t.deadline && daysUntil(t.deadline) < 0;
+                return (
+                  <div key={t.id} className={`flex items-center gap-3 px-4 py-3 transition hover:bg-white/5 ${i > 0 ? "border-t border-white/5" : ""}`}>
+                    <div className="flex h-5 w-5 items-center justify-center rounded-md border border-primary/50">
+                      {t.status === "selesai" && <Icon name="check" className="text-xs text-primary" />}
+                    </div>
+                    <div className="flex-1 overflow-hidden">
+                      <p className="truncate text-sm font-semibold text-on-surface">{t.task_name}</p>
+                      <p className={`text-[10px] mt-0.5 ${overdue ? "text-danger-red" : "text-on-surface-variant"}`}>
+                        {t.deadline ? `Deadline ${formatDateShortID(t.deadline)}` : TASK_STATUS_LABEL[t.status as keyof typeof TASK_STATUS_LABEL]}
+                      </p>
                     </div>
                   </div>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-sm text-slate-500">Belum ada acara mendatang.</p>
-          )}
-        </div>
-
-        <div className="card">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-semibold text-slate-900">Tugas Aktif</h2>
-            <Link href="/tasks" className="text-sm text-indigo-600 hover:underline">Lihat semua</Link>
+                );
+              })
+            ) : (
+              <div className="px-4 py-8 text-center text-sm text-on-surface-variant">
+                <Icon name="checklist" className="text-3xl text-on-surface-variant" />
+                <p className="mt-2">Tidak ada tugas aktif.</p>
+              </div>
+            )}
           </div>
-          {activeTasks?.length ? (
-            <ul className="space-y-2">
-              {activeTasks.map((t) => (
-                <li key={t.id} className="rounded-lg border border-slate-100 p-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-medium text-slate-900">{t.task_name}</span>
-                    <span className={`badge ${t.status === "sedang_dikerjakan" ? "bg-blue-100 text-blue-700" : "bg-slate-100 text-slate-700"}`}>
-                      {TASK_STATUS_LABEL[t.status as keyof typeof TASK_STATUS_LABEL]}
-                    </span>
-                  </div>
-                  {t.deadline && <div className="mt-1 text-xs text-slate-500">Deadline: {formatDateShortID(t.deadline)}</div>}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-sm text-slate-500">Tidak ada tugas aktif.</p>
-          )}
-        </div>
+        </section>
       </div>
 
+      {/* Recent notes */}
       {recentNotes && recentNotes.length > 0 && (
-        <div className="card">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-semibold text-slate-900">Catatan Terbaru</h2>
-            <Link href="/notes" className="text-sm text-indigo-600 hover:underline">Lihat semua</Link>
+        <section className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-headline-md">Catatan Terbaru</h3>
+            <Link href="/notes" className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-primary hover:text-primary-fixed-dim">
+              Lihat <Icon name="arrow_forward" className="text-sm" />
+            </Link>
           </div>
           <div className="grid gap-3 md:grid-cols-3">
-            {recentNotes.map((n) => (
-              <div key={n.id} className="rounded-lg border border-slate-100 bg-yellow-50 p-3">
-                <div className="font-medium text-slate-900">{n.title}</div>
-                <p className="mt-1 line-clamp-3 text-sm text-slate-600">{n.content}</p>
+            {(recentNotes as { id: string; title: string; content: string }[]).map((n) => (
+              <div key={n.id} className="glass-card neon-card p-4">
+                <Icon name="sticky_note_2" className="text-secondary" />
+                <div className="mt-2 font-bold text-on-surface">{n.title}</div>
+                <p className="mt-1 line-clamp-3 text-sm text-on-surface-variant">{n.content}</p>
               </div>
             ))}
           </div>
-        </div>
+        </section>
       )}
     </div>
   );
 }
 
-function StatCard({ label, value, icon, href }: { label: string; value: number; icon: string; href: string }) {
+function StatCard({ label, value, icon, color, href, hint }: { label: string; value: number; icon: string; color: string; href: string; hint?: string }) {
+  const colorClass: Record<string, { text: string; glow: string }> = {
+    primary: { text: "text-primary", glow: "bg-primary/10 group-hover:bg-primary/20" },
+    tertiary: { text: "text-tertiary", glow: "bg-tertiary/10 group-hover:bg-tertiary/20" },
+    secondary: { text: "text-secondary", glow: "bg-secondary/10 group-hover:bg-secondary/20" },
+    "success-green": { text: "text-success-green", glow: "bg-success-green/10 group-hover:bg-success-green/20" },
+  };
+  const c = colorClass[color] ?? colorClass.primary;
   return (
-    <Link href={href} className="card hover:shadow-md transition">
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="text-sm text-slate-500">{label}</div>
-          <div className="mt-1 text-3xl font-bold text-slate-900">{value}</div>
-        </div>
-        <div className="text-3xl">{icon}</div>
+    <Link href={href} className="glass-card group relative flex flex-col gap-1 overflow-hidden p-4 transition hover:border-white/20">
+      <div className={`absolute -right-4 -top-4 h-16 w-16 rounded-full blur-xl transition-all ${c.glow}`} />
+      <div className="flex items-center gap-2 text-on-surface-variant">
+        <Icon name={icon} className={`text-sm ${c.text}`} />
+        <span className="text-[11px] font-semibold uppercase tracking-[0.1em]">{label}</span>
       </div>
+      <div className="text-3xl font-extrabold text-on-surface">{value}</div>
+      {hint && <div className="text-[11px] text-on-surface-variant">{hint}</div>}
     </Link>
   );
 }
 
-// Server actions wrapped to convert ActionResult errors into URL query so the
-// page can render them statically (no client-side useActionState needed).
 async function createFamilySubmit(formData: FormData) {
   "use server";
   const result = await createFamilyAction({}, formData);

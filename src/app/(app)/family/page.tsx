@@ -2,13 +2,12 @@ import { requireFamily } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/server";
 import { formatDateShortID } from "@/lib/utils";
 import { SubmitButton } from "@/components/SubmitButton";
+import { Icon } from "@/components/Icon";
 import FamilyClient from "./client";
 import { removeMemberAction, revokeInviteAction } from "./actions";
 
 export default async function FamilyPage() {
   const ctx = await requireFamily();
-  // Service client bypasses RLS so we can fetch member profiles reliably.
-  // Authorization is enforced by requireFamily() above (user is in this family).
   const service = createServiceClient();
 
   const [{ data: memberRows }, { data: invites }] = await Promise.all([
@@ -44,37 +43,44 @@ export default async function FamilyPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">{ctx.family.family_name}</h1>
-        {ctx.family.description && <p className="mt-1 text-sm text-slate-600">{ctx.family.description}</p>}
-      </div>
+      <header>
+        <h1 className="text-display-lg-mobile tracking-tight">
+          <span className="text-gradient">{ctx.family.family_name}</span>
+        </h1>
+        {ctx.family.description && <p className="mt-2 text-on-surface-variant">{ctx.family.description}</p>}
+      </header>
 
       {ctx.isAdmin && <FamilyClient family={ctx.family} />}
 
-      <section className="card">
-        <h2 className="mb-4 font-semibold text-slate-900">Anggota Keluarga ({members.length})</h2>
-        <ul className="divide-y divide-slate-100">
+      <section className="glass-card neon-card p-6">
+        <h2 className="mb-4 flex items-center gap-2 text-headline-md text-primary">
+          <Icon name="groups" filled /> Anggota Keluarga ({members.length})
+        </h2>
+        <ul className="divide-y divide-white/5">
           {members.map((m) => (
-            <li key={m.id} className="flex items-center justify-between py-3">
+            <li key={m.id} className="flex items-center justify-between gap-3 py-3">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 font-semibold text-indigo-700">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full border border-primary/50 bg-primary-container/30 font-bold text-primary">
                   {m.profile.full_name.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <div className="font-medium text-slate-900">
-                    {m.profile.full_name} {m.user_id === ctx.userId && <span className="text-xs text-slate-500">(Anda)</span>}
+                  <div className="font-semibold text-on-surface">
+                    {m.profile.full_name} {m.user_id === ctx.userId && <span className="text-xs font-normal text-on-surface-variant">(Anda)</span>}
                   </div>
-                  <div className="text-xs text-slate-500">{m.profile.email} · Bergabung {formatDateShortID(m.joined_at)}</div>
+                  <div className="text-xs text-on-surface-variant">{m.profile.email} · Bergabung {formatDateShortID(m.joined_at)}</div>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <span className={`badge ${m.role === "admin" ? "bg-indigo-100 text-indigo-700" : "bg-slate-100 text-slate-700"}`}>
+                <span className={`badge ${m.role === "admin" ? "bg-primary-container/30 text-primary" : "bg-surface-container-high text-on-surface-variant"}`}>
+                  {m.role === "admin" && <Icon name="shield" className="text-xs" />}
                   {m.role === "admin" ? "Admin" : "Anggota"}
                 </span>
                 {ctx.isAdmin && m.user_id !== ctx.userId && (
                   <form action={removeMemberAction}>
                     <input type="hidden" name="user_id" value={m.user_id} />
-                    <SubmitButton className="text-xs text-red-600 hover:underline" pendingLabel="...">Keluarkan</SubmitButton>
+                    <SubmitButton className="rounded-lg p-2 text-on-surface-variant hover:bg-danger-red/10 hover:text-danger-red" pendingLabel="">
+                      <Icon name="person_remove" className="text-base" />
+                    </SubmitButton>
                   </form>
                 )}
               </div>
@@ -84,18 +90,20 @@ export default async function FamilyPage() {
       </section>
 
       {ctx.isAdmin && invites && invites.length > 0 && (
-        <section className="card">
-          <h2 className="mb-4 font-semibold text-slate-900">Undangan Tertunda ({invites.length})</h2>
-          <ul className="divide-y divide-slate-100">
+        <section className="glass-card p-6">
+          <h2 className="mb-4 flex items-center gap-2 text-headline-md">
+            <Icon name="schedule_send" /> Undangan Tertunda ({invites.length})
+          </h2>
+          <ul className="divide-y divide-white/5">
             {invites.map((inv: { id: string; email: string; token: string }) => (
               <li key={inv.id} className="flex items-center justify-between gap-2 py-3">
-                <div>
-                  <div className="font-medium text-slate-900">{inv.email}</div>
-                  <div className="mt-1 font-mono text-xs text-slate-500 break-all">{inv.token}</div>
+                <div className="flex-1 overflow-hidden">
+                  <div className="font-semibold text-on-surface">{inv.email}</div>
+                  <div className="mt-1 break-all rounded bg-surface-container-low px-2 py-1 font-mono text-xs text-on-surface-variant">{inv.token}</div>
                 </div>
                 <form action={revokeInviteAction}>
                   <input type="hidden" name="id" value={inv.id} />
-                  <SubmitButton className="text-xs text-red-600 hover:underline" pendingLabel="...">Batalkan</SubmitButton>
+                  <SubmitButton className="btn btn-ghost text-xs text-danger-red hover:bg-danger-red/10" pendingLabel="...">Batalkan</SubmitButton>
                 </form>
               </li>
             ))}

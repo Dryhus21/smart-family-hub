@@ -1,5 +1,6 @@
 import { requireFamily } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/server";
+import { Icon } from "@/components/Icon";
 
 const ACTION_LABEL: Record<string, string> = {
   create_family: "membuat keluarga",
@@ -15,6 +16,22 @@ const ACTION_LABEL: Record<string, string> = {
   delete_task: "menghapus tugas",
   create_note: "membuat catatan",
   delete_note: "menghapus catatan",
+};
+
+const ACTION_ICON: Record<string, string> = {
+  create_family: "add_home",
+  join_family: "login",
+  invite_member: "person_add",
+  remove_member: "person_remove",
+  leave_family: "logout",
+  update_family: "edit",
+  create_event: "celebration",
+  delete_event: "event_busy",
+  create_task: "add_task",
+  update_task_status: "autorenew",
+  delete_task: "delete",
+  create_note: "note_add",
+  delete_note: "delete",
 };
 
 function relTime(iso: string) {
@@ -46,35 +63,42 @@ export default async function ActivityPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Riwayat Aktivitas</h1>
-        <p className="mt-1 text-sm text-slate-600">100 aktivitas terbaru keluarga.</p>
-      </div>
-      <div className="card">
+      <header>
+        <h1 className="text-display-lg-mobile tracking-tight">
+          <span className="text-gradient">Riwayat Aktivitas</span>
+        </h1>
+        <p className="mt-2 text-on-surface-variant">100 aktivitas terbaru di keluarga ini.</p>
+      </header>
+
+      <div className="glass-card neon-card p-6">
         {logs && logs.length ? (
-          <ul className="divide-y divide-slate-100">
+          <ul className="space-y-3">
             {(logs as { id: string; actor_id: string | null; action: string; metadata: Record<string, unknown> | null; created_at: string }[]).map((l) => {
               const name = l.actor_id ? actorMap.get(l.actor_id) ?? "Seseorang" : "Seseorang";
               const action = ACTION_LABEL[l.action] ?? l.action;
               const detail = (l.metadata && (l.metadata.title || l.metadata.name || l.metadata.email)) ?? "";
+              const icon = ACTION_ICON[l.action] ?? "notifications";
               return (
-                <li key={l.id} className="flex items-start gap-3 py-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-xs font-semibold text-indigo-700">
-                    {name.charAt(0).toUpperCase()}
+                <li key={l.id} className="flex items-start gap-3 rounded-lg border border-white/5 bg-surface-container/40 p-3 transition hover:border-primary/30">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-container/30 text-primary">
+                    <Icon name={icon} className="text-base" />
                   </div>
                   <div className="flex-1">
-                    <div className="text-sm text-slate-900">
-                      <strong>{name}</strong> {action}
-                      {detail ? <> &quot;<em>{String(detail)}</em>&quot;</> : null}
+                    <div className="text-sm text-on-surface">
+                      <span className="font-bold text-primary">{name}</span> {action}
+                      {detail ? <> <span className="italic text-on-surface-variant">&quot;{String(detail)}&quot;</span></> : null}
                     </div>
-                    <div className="text-xs text-slate-500">{relTime(l.created_at)}</div>
+                    <div className="mt-0.5 text-xs text-on-surface-variant">{relTime(l.created_at)}</div>
                   </div>
                 </li>
               );
             })}
           </ul>
         ) : (
-          <p className="text-sm text-slate-500">Belum ada aktivitas tercatat.</p>
+          <div className="py-8 text-center text-sm text-on-surface-variant">
+            <Icon name="history" className="text-3xl" />
+            <p className="mt-2">Belum ada aktivitas tercatat.</p>
+          </div>
         )}
       </div>
     </div>

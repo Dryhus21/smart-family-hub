@@ -1,108 +1,129 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getAuthContext } from "@/lib/auth";
-import { NavLink, NavLinkCompact } from "@/components/NavLink";
 import { SubmitButton } from "@/components/SubmitButton";
+import { Logo } from "@/components/Logo";
+import { Icon } from "@/components/Icon";
+import { NavSidebarLink, NavBottomLink } from "@/components/AppNav";
 import { logoutAction } from "../(auth)/actions";
 
 const NAV = [
-  { href: "/dashboard", label: "Dashboard", icon: "🏠" },
-  { href: "/calendar", label: "Kalender", icon: "📅" },
-  { href: "/events", label: "Acara", icon: "🎉" },
-  { href: "/tasks", label: "Tugas", icon: "✅" },
-  { href: "/notes", label: "Catatan", icon: "📝" },
-  { href: "/family", label: "Keluarga", icon: "👨‍👩‍👧" },
-  { href: "/activity", label: "Riwayat", icon: "📜" },
+  { href: "/dashboard", label: "Overview", icon: "dashboard" },
+  { href: "/calendar", label: "Kalender", icon: "calendar_month" },
+  { href: "/events", label: "Acara", icon: "celebration" },
+  { href: "/tasks", label: "Tugas", icon: "assignment_turned_in" },
+  { href: "/notes", label: "Catatan", icon: "note_alt" },
+  { href: "/family", label: "Keluarga", icon: "groups" },
+  { href: "/activity", label: "Riwayat", icon: "history" },
+];
+
+const BOTTOM_NAV = [
+  { href: "/dashboard", label: "Home", icon: "home" },
+  { href: "/calendar", label: "Kalender", icon: "calendar_month" },
+  { href: "/tasks", label: "Tugas", icon: "assignment_turned_in" },
+  { href: "/family", label: "Keluarga", icon: "groups" },
 ];
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const ctx = await getAuthContext();
-  // Don't redirect from layout — child pages handle auth themselves to avoid
-  // redirect loops when session state is ambiguous.
+
   if (!ctx) {
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen">
         <main className="mx-auto max-w-3xl p-4 md:p-8">{children}</main>
       </div>
     );
   }
 
-  // If the user has no family, render the children without the navigation
-  // chrome. Individual pages (notably /dashboard) will render the onboarding
-  // experience inline. This avoids a server-side redirect from inside this
-  // layout, which can interact badly with the route-group error boundary on
-  // Next.js 16 turbopack and leave the page blank.
   if (!ctx.family) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
-        <header className="mx-auto flex max-w-3xl items-center justify-between px-6 py-6">
+      <div className="min-h-screen">
+        <header className="mx-auto flex max-w-3xl items-center justify-between px-5 py-6 md:px-10">
           <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 font-bold text-white">SF</div>
-            <span className="font-semibold text-slate-900">Smart Family Hub</span>
+            <Logo size={36} />
+            <span className="font-extrabold text-primary text-lg">FamilyHub</span>
           </Link>
           <form action={logoutAction}>
-            <button className="btn btn-ghost text-sm" type="submit">🚪 Keluar</button>
+            <SubmitButton className="btn btn-secondary text-sm" pendingLabel="Keluar...">
+              <Icon name="logout" className="text-base" /> Keluar
+            </SubmitButton>
           </form>
         </header>
-        <main className="mx-auto max-w-3xl px-4 pb-12">{children}</main>
+        <main className="mx-auto max-w-3xl px-4 pb-12 md:px-10">{children}</main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="flex">
-        <aside className="sticky top-0 hidden h-screen w-64 flex-shrink-0 border-r border-slate-200 bg-white md:flex md:flex-col">
-          <div className="border-b border-slate-200 p-5">
-            <Link href="/dashboard" className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 font-bold text-white">SF</div>
-              <div>
-                <div className="text-sm font-semibold text-slate-900">Smart Family Hub</div>
-                <div className="text-xs text-slate-500">{ctx.family.family_name}</div>
-              </div>
-            </Link>
-          </div>
-          <nav className="flex-1 space-y-1 p-3">
+    <div className="min-h-screen">
+      {/* Desktop Sidebar */}
+      <aside className="fixed left-0 top-0 z-40 hidden h-screen w-[280px] border-r border-neon-border bg-surface-container-low/70 backdrop-blur-xl lg:flex lg:flex-col">
+        <div className="flex h-full flex-col gap-6 px-4 py-6">
+          {/* Header */}
+          <Link href="/dashboard" className="flex items-center gap-3 px-2">
+            <Logo size={44} />
+            <div className="min-w-0">
+              <h1 className="truncate text-base font-extrabold text-primary tracking-tight">{ctx.family.family_name}</h1>
+              <p className="mt-0.5 text-[11px] tracking-[0.18em] font-semibold text-on-surface-variant uppercase">
+                Family Hub
+              </p>
+            </div>
+          </Link>
+
+          {/* Navigation */}
+          <nav className="flex flex-1 flex-col gap-1">
             {NAV.map((n) => (
-              <NavLink key={n.href} href={n.href} icon={n.icon} label={n.label} />
+              <NavSidebarLink key={n.href} href={n.href} icon={n.icon} label={n.label} />
             ))}
           </nav>
-          <div className="border-t border-slate-200 p-3">
-            <div className="flex items-center gap-3 rounded-lg px-3 py-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 font-semibold text-indigo-700">
-                {ctx.profile.full_name.charAt(0).toUpperCase()}
-              </div>
-              <div className="flex-1 overflow-hidden">
-                <div className="truncate text-sm font-medium text-slate-900">{ctx.profile.full_name}</div>
-                <div className="truncate text-xs text-slate-500">{ctx.isAdmin ? "Admin" : "Anggota"}</div>
+
+          {/* User card */}
+          <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-surface-container/70 p-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-primary/60 bg-primary-container/30 font-bold text-primary">
+              {ctx.profile.full_name.charAt(0).toUpperCase()}
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <div className="truncate text-sm font-semibold text-on-surface">{ctx.profile.full_name}</div>
+              <div className="truncate text-[11px] font-semibold tracking-wider text-on-surface-variant uppercase">
+                {ctx.isAdmin ? "Admin" : "Anggota"}
               </div>
             </div>
             <form action={logoutAction}>
-              <SubmitButton className="btn btn-ghost mt-2 w-full justify-start text-sm" pendingLabel="Keluar...">🚪 Logout</SubmitButton>
+              <SubmitButton
+                className="rounded-lg p-2 text-on-surface-variant transition hover:bg-white/5 hover:text-danger-red"
+                pendingLabel=""
+              >
+                <Icon name="logout" className="text-base" />
+              </SubmitButton>
             </form>
           </div>
-        </aside>
-
-        <div className="flex w-full flex-col md:ml-0">
-          <header className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 md:hidden">
-            <Link href="/dashboard" className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-xs font-bold text-white">SF</div>
-              <span className="font-semibold text-slate-900">Family Hub</span>
-            </Link>
-            <form action={logoutAction}>
-              <button className="text-sm text-slate-600" type="submit">Keluar</button>
-            </form>
-          </header>
-          <nav className="border-b border-slate-200 bg-white px-2 py-2 md:hidden">
-            <div className="flex gap-1 overflow-x-auto">
-              {NAV.map((n) => (
-                <NavLinkCompact key={n.href} href={n.href} icon={n.icon} label={n.label} />
-              ))}
-            </div>
-          </nav>
-          <main className="flex-1 p-4 md:p-8">{children}</main>
         </div>
-      </div>
+      </aside>
+
+      {/* Mobile top bar */}
+      <header className="fixed top-0 z-30 flex h-16 w-full items-center justify-between border-b border-white/10 bg-glass-bg px-4 backdrop-blur-lg lg:hidden">
+        <Link href="/dashboard" className="flex items-center gap-2">
+          <Logo size={32} />
+          <span className="text-sm font-extrabold text-primary">{ctx.family.family_name}</span>
+        </Link>
+        <form action={logoutAction}>
+          <SubmitButton className="rounded-lg p-2 text-on-surface-variant" pendingLabel="">
+            <Icon name="logout" className="text-base" />
+          </SubmitButton>
+        </form>
+      </header>
+
+      {/* Mobile bottom nav */}
+      <nav className="fixed bottom-3 left-1/2 z-50 flex w-[90%] -translate-x-1/2 items-center justify-around rounded-full border border-white/10 bg-glass-bg p-2 shadow-[0_0_15px_rgba(99,102,241,0.15)] backdrop-blur-lg lg:hidden">
+        {BOTTOM_NAV.map((n) => (
+          <NavBottomLink key={n.href} href={n.href} icon={n.icon} label={n.label} />
+        ))}
+      </nav>
+
+      {/* Main content */}
+      <main className="min-h-screen pt-20 pb-28 lg:ml-[280px] lg:pt-0 lg:pb-10">
+        <div className="px-5 py-6 md:px-10 md:py-10">{children}</div>
+      </main>
     </div>
   );
 }

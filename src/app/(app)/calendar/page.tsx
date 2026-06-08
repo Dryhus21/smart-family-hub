@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireFamily } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/server";
 import { formatTimeID } from "@/lib/utils";
+import { Icon } from "@/components/Icon";
 
 type CalendarEvent = {
   id: string;
@@ -35,7 +36,6 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
 
   const evs = (events ?? []) as CalendarEvent[];
 
-  // Fetch creator names
   const creatorIds = Array.from(new Set(evs.map((e) => e.created_by)));
   const { data: profileRows } = creatorIds.length
     ? await service.from("profiles").select("id, full_name").in("id", creatorIds)
@@ -72,46 +72,59 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Kalender Keluarga</h1>
-          <p className="mt-1 text-sm text-slate-600">Acara keluarga ditampilkan beserta pembuatnya.</p>
+          <h1 className="text-display-lg-mobile tracking-tight">
+            <span className="text-gradient">Kalender Keluarga</span>
+          </h1>
+          <p className="mt-2 text-on-surface-variant">Acara ditampilkan beserta nama pembuatnya.</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Link href={`/calendar?m=${prevMonth}&y=${prevYear}`} className="btn btn-secondary">‹</Link>
-          <div className="min-w-[180px] text-center font-medium text-slate-900">{monthName}</div>
-          <Link href={`/calendar?m=${nextMonth}&y=${nextYear}`} className="btn btn-secondary">›</Link>
+        <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-surface-container/60 p-1.5 backdrop-blur-lg">
+          <Link href={`/calendar?m=${prevMonth}&y=${prevYear}`} className="flex h-8 w-8 items-center justify-center rounded-lg text-on-surface-variant hover:bg-white/5 hover:text-primary">
+            <Icon name="chevron_left" />
+          </Link>
+          <div className="min-w-[150px] text-center text-sm font-semibold uppercase tracking-wider text-on-surface">
+            {monthName}
+          </div>
+          <Link href={`/calendar?m=${nextMonth}&y=${nextYear}`} className="flex h-8 w-8 items-center justify-center rounded-lg text-on-surface-variant hover:bg-white/5 hover:text-primary">
+            <Icon name="chevron_right" />
+          </Link>
         </div>
-      </div>
+      </header>
 
-      <div className="card">
+      <div className="glass-card p-4">
         <div className="grid grid-cols-7 gap-1">
           {dayNames.map((d) => (
-            <div key={d} className="py-2 text-center text-xs font-semibold text-slate-500">{d}</div>
+            <div key={d} className="py-2 text-center text-[10px] font-bold uppercase tracking-[0.15em] text-on-surface-variant">{d}</div>
           ))}
           {cells.map((d, i) => (
-            <div key={i} className={`min-h-28 rounded-lg border p-2 ${d ? "border-slate-100 bg-white" : "border-transparent bg-slate-50"} ${d && isToday(d) ? "ring-2 ring-indigo-500" : ""}`}>
+            <div
+              key={i}
+              className={`min-h-28 rounded-lg border p-2 transition ${
+                d ? "border-white/5 bg-surface-container-low/50 hover:bg-surface-container-low" : "border-transparent bg-transparent"
+              } ${d && isToday(d) ? "border-primary/60 bg-primary-container/10 ring-1 ring-primary/40" : ""}`}
+            >
               {d && (
                 <>
-                  <div className={`text-xs font-medium ${isToday(d) ? "text-indigo-600" : "text-slate-700"}`}>{d}</div>
+                  <div className={`text-xs font-bold ${isToday(d) ? "text-primary" : "text-on-surface-variant"}`}>{d}</div>
                   <div className="mt-1 space-y-1">
                     {(byDay.get(d) ?? []).slice(0, 3).map((e) => (
                       <div
                         key={e.id}
-                        className="rounded bg-indigo-100 px-1.5 py-1 text-[11px] text-indigo-900"
+                        className="rounded border border-primary/30 bg-primary-container/15 px-1.5 py-1 text-[10px] text-primary"
                         title={`${e.title} - oleh ${creatorLabel(e.created_by)}`}
                       >
-                        <div className="truncate font-medium">
+                        <div className="truncate font-semibold">
                           {e.event_time && <span>{formatTimeID(e.event_time)} </span>}
                           {e.title}
                         </div>
-                        <div className="truncate text-[10px] text-indigo-700">
-                          👤 {creatorLabel(e.created_by)}
+                        <div className="truncate text-[9px] opacity-80">
+                          <span className="material-symbols-outlined" style={{ fontSize: 9, verticalAlign: "middle" }}>person</span> {creatorLabel(e.created_by)}
                         </div>
                       </div>
                     ))}
                     {(byDay.get(d)?.length ?? 0) > 3 && (
-                      <div className="text-[10px] text-slate-500">+{byDay.get(d)!.length - 3} lainnya</div>
+                      <div className="text-[9px] font-semibold text-on-surface-variant">+{byDay.get(d)!.length - 3} lainnya</div>
                     )}
                   </div>
                 </>
