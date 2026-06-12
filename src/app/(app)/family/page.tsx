@@ -4,6 +4,7 @@ import { formatDateShortID } from "@/lib/utils";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Icon } from "@/components/Icon";
 import FamilyClient from "./client";
+import { AvatarUpload } from "./AvatarUpload";
 import { removeMemberAction, revokeInviteAction } from "./actions";
 
 export default async function FamilyPage() {
@@ -28,17 +29,17 @@ export default async function FamilyPage() {
 
   const userIds = (memberRows ?? []).map((m: { user_id: string }) => m.user_id);
   const { data: profileRows } = userIds.length
-    ? await service.from("profiles").select("id, full_name, email").in("id", userIds)
-    : { data: [] as { id: string; full_name: string; email: string }[] };
+    ? await service.from("profiles").select("id, full_name, email, avatar_url").in("id", userIds)
+    : { data: [] as { id: string; full_name: string; email: string; avatar_url: string | null }[] };
 
-  const profileMap = new Map<string, { full_name: string; email: string }>();
-  (profileRows ?? []).forEach((p: { id: string; full_name: string; email: string }) => {
-    profileMap.set(p.id, { full_name: p.full_name, email: p.email });
+  const profileMap = new Map<string, { full_name: string; email: string; avatar_url: string | null }>();
+  (profileRows ?? []).forEach((p: { id: string; full_name: string; email: string; avatar_url: string | null }) => {
+    profileMap.set(p.id, { full_name: p.full_name, email: p.email, avatar_url: p.avatar_url });
   });
 
   const members = (memberRows ?? []).map((m: { id: string; user_id: string; role: string; joined_at: string }) => ({
     ...m,
-    profile: profileMap.get(m.user_id) ?? { full_name: "(profil tidak ditemukan)", email: "" },
+    profile: profileMap.get(m.user_id) ?? { full_name: "(profil tidak ditemukan)", email: "", avatar_url: null },
   }));
 
   return (
@@ -60,9 +61,23 @@ export default async function FamilyPage() {
           {members.map((m) => (
             <li key={m.id} className="flex items-center justify-between gap-3 py-3">
               <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-full border border-primary/50 bg-primary-container/30 font-bold text-primary">
-                  {m.profile.full_name.charAt(0).toUpperCase()}
-                </div>
+                {m.user_id === ctx.userId ? (
+                  <AvatarUpload
+                    currentUrl={m.profile.avatar_url}
+                    initials={m.profile.full_name.charAt(0).toUpperCase()}
+                  />
+                ) : m.profile.avatar_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={m.profile.avatar_url}
+                    alt={m.profile.full_name}
+                    className="h-11 w-11 rounded-full object-cover border border-primary/30"
+                  />
+                ) : (
+                  <div className="flex h-11 w-11 items-center justify-center rounded-full border border-primary/50 bg-primary-container/30 font-bold text-primary">
+                    {m.profile.full_name.charAt(0).toUpperCase()}
+                  </div>
+                )}
                 <div>
                   <div className="font-semibold text-on-surface">
                     {m.profile.full_name} {m.user_id === ctx.userId && <span className="text-xs font-normal text-on-surface-variant">(Anda)</span>}

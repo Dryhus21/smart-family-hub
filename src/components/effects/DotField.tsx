@@ -23,7 +23,7 @@ export function DotField({
   bulgeOnly = true,
   bulgeStrength = 67,
   glowRadius = 160,
-  color = "rgba(47, 91, 120, 0.35)",
+  color = "rgba(74, 117, 149, 0.22)",
 }: DotFieldProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 

@@ -31,6 +31,35 @@ export async function createEventAction(_prev: ActionResult, formData: FormData)
   return { success: "Acara berhasil dibuat" };
 }
 
+export async function updateEventAction(_prev: ActionResult, formData: FormData): Promise<ActionResult> {
+  const ctx = await requireFamily();
+  const id = String(formData.get("id"));
+  const title = String(formData.get("title") ?? "").trim();
+  const event_date = String(formData.get("event_date") ?? "");
+  const event_time = String(formData.get("event_time") ?? "") || null;
+  const location = String(formData.get("location") ?? "").trim() || null;
+  const description = String(formData.get("description") ?? "").trim() || null;
+  if (!title) return { error: "Judul acara wajib diisi" };
+  if (!event_date) return { error: "Tanggal acara wajib diisi" };
+
+  const service = createServiceClient();
+  const { data: ev } = await service.from("events").select("family_id, created_by").eq("id", id).single();
+  if (!ev || ev.family_id !== ctx.family.id) return { error: "Acara tidak ditemukan" };
+  if (ev.created_by !== ctx.userId && !ctx.isAdmin) return { error: "Tidak punya izin" };
+
+  const { error } = await service
+    .from("events")
+    .update({ title, event_date, event_time, location, description })
+    .eq("id", id);
+  if (error) return { error: error.message };
+
+  await logActivity({ familyId: ctx.family.id, actorId: ctx.userId, action: "update_event", entityType: "event", entityId: id, metadata: { title } });
+  revalidatePath("/events");
+  revalidatePath("/calendar");
+  revalidatePath("/dashboard");
+  return { success: "Acara berhasil diperbarui" };
+}
+
 export async function deleteEventAction(formData: FormData): Promise<void> {
   const ctx = await requireFamily();
   const id = String(formData.get("id"));

@@ -4,6 +4,39 @@ import { revalidatePath } from "next/cache";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { requireAdmin, requireFamily, logActivity } from "@/lib/auth";
 
+export type UploadResult = { error?: string; url?: string };
+
+export async function uploadAvatarAction(formData: FormData): Promise<UploadResult> {
+  const ctx = await requireFamily();
+  const file = formData.get("avatar") as File | null;
+  if (!file || file.size === 0) return { error: "File tidak ditemukan" };
+  if (file.size > 2 * 1024 * 1024) return { error: "Ukuran file maksimal 2 MB" };
+  if (!file.type.startsWith("image/")) return { error: "File harus berupa gambar" };
+
+  const ext = file.name.split(".").pop() ?? "jpg";
+  const path = `avatars/${ctx.userId}.${ext}`;
+  const bytes = await file.arrayBuffer();
+
+  const service = createServiceClient();
+  const { error: uploadError } = await service.storage
+    .from("family-assets")
+    .upload(path, bytes, { contentType: file.type, upsert: true });
+  if (uploadError) return { error: uploadError.message };
+
+  const { data: urlData } = service.storage.from("family-assets").getPublicUrl(path);
+  const url = `${urlData.publicUrl}?t=${Date.now()}`;
+
+  const { error: updateError } = await service
+    .from("profiles")
+    .update({ avatar_url: urlData.publicUrl })
+    .eq("id", ctx.userId);
+  if (updateError) return { error: updateError.message };
+
+  revalidatePath("/family");
+  revalidatePath("/", "layout");
+  return { url };
+}
+
 export type ActionResult = { error?: string; success?: string; token?: string };
 
 export async function updateFamilyAction(_prev: ActionResult, formData: FormData): Promise<ActionResult> {

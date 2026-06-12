@@ -1,14 +1,16 @@
 import Link from "next/link";
 import { requireFamily } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/server";
-import { formatTimeID } from "@/lib/utils";
 import { Icon } from "@/components/Icon";
+import CalendarGrid from "./CalendarGrid";
 
 type CalendarEvent = {
   id: string;
   title: string;
   event_date: string;
   event_time: string | null;
+  location: string | null;
+  description: string | null;
   created_by: string;
 };
 
@@ -28,7 +30,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
   const monthStr = `${year}-${String(month + 1).padStart(2, "0")}`;
   const { data: events } = await service
     .from("events")
-    .select("id, title, event_date, event_time, created_by")
+    .select("id, title, event_date, event_time, location, description, created_by")
     .eq("family_id", ctx.family.id)
     .gte("event_date", `${monthStr}-01`)
     .lte("event_date", `${monthStr}-${String(daysInMonth).padStart(2, "0")}`)
@@ -40,19 +42,23 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
   const { data: profileRows } = creatorIds.length
     ? await service.from("profiles").select("id, full_name").in("id", creatorIds)
     : { data: [] as { id: string; full_name: string }[] };
-  const nameMap = new Map<string, string>();
-  (profileRows ?? []).forEach((p: { id: string; full_name: string }) => nameMap.set(p.id, p.full_name));
-  const creatorLabel = (uid: string) => {
-    const name = nameMap.get(uid) ?? "Anggota";
-    return uid === ctx.userId ? `${name} (Anda)` : name;
-  };
+  const nameMapObj: Record<string, string> = {};
+  (profileRows ?? []).forEach((p: { id: string; full_name: string }) => { nameMapObj[p.id] = p.full_name; });
+  const creatorLabels: Record<string, string> = {};
+  evs.forEach((e) => {
+    if (!(e.created_by in creatorLabels)) {
+      const name = nameMapObj[e.created_by] ?? "Anggota";
+      creatorLabels[e.created_by] = e.created_by === ctx.userId ? `${name} (Anda)` : name;
+    }
+  });
 
-  const byDay = new Map<number, CalendarEvent[]>();
+  const byDayMap = new Map<number, CalendarEvent[]>();
   evs.forEach((e) => {
     const d = new Date(e.event_date).getDate();
-    if (!byDay.has(d)) byDay.set(d, []);
-    byDay.get(d)!.push(e);
+    if (!byDayMap.has(d)) byDayMap.set(d, []);
+    byDayMap.get(d)!.push(e);
   });
+  const byDay = Object.fromEntries(byDayMap);
 
   const prevMonth = month === 0 ? 11 : month - 1;
   const prevYear = month === 0 ? year - 1 : year;
@@ -92,47 +98,13 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
         </div>
       </header>
 
-      <div className="glass-card p-4">
-        <div className="grid grid-cols-7 gap-1">
-          {dayNames.map((d) => (
-            <div key={d} className="py-2 text-center text-[10px] font-bold uppercase tracking-[0.15em] text-on-surface-variant">{d}</div>
-          ))}
-          {cells.map((d, i) => (
-            <div
-              key={i}
-              className={`min-h-28 rounded-lg border p-2 transition ${
-                d ? "border-white/5 bg-surface-container-low/50 hover:bg-surface-container-low" : "border-transparent bg-transparent"
-              } ${d && isToday(d) ? "border-primary/60 bg-primary-container/10 ring-1 ring-primary/40" : ""}`}
-            >
-              {d && (
-                <>
-                  <div className={`text-xs font-bold ${isToday(d) ? "text-primary" : "text-on-surface-variant"}`}>{d}</div>
-                  <div className="mt-1 space-y-1">
-                    {(byDay.get(d) ?? []).slice(0, 3).map((e) => (
-                      <div
-                        key={e.id}
-                        className="rounded border border-primary/30 bg-primary-container/15 px-1.5 py-1 text-[10px] text-primary"
-                        title={`${e.title} - oleh ${creatorLabel(e.created_by)}`}
-                      >
-                        <div className="truncate font-semibold">
-                          {e.event_time && <span>{formatTimeID(e.event_time)} </span>}
-                          {e.title}
-                        </div>
-                        <div className="truncate text-[9px] opacity-80">
-                          <span className="material-symbols-outlined" style={{ fontSize: 9, verticalAlign: "middle" }}>person</span> {creatorLabel(e.created_by)}
-                        </div>
-                      </div>
-                    ))}
-                    {(byDay.get(d)?.length ?? 0) > 3 && (
-                      <div className="text-[9px] font-semibold text-on-surface-variant">+{byDay.get(d)!.length - 3} lainnya</div>
-                    )}
-                  </div>
-                </>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
+      <CalendarGrid
+        cells={cells}
+        byDay={byDay}
+        isToday={isToday}
+        dayNames={dayNames}
+        creatorLabel={(uid) => creatorLabels[uid] ?? "Anggota"}
+      />
     </div>
   );
 }
