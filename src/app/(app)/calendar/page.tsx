@@ -73,8 +73,6 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
   while (cells.length % 7 !== 0) cells.push(null);
 
   const todayDate = new Date();
-  const isToday = (d: number) =>
-    d === todayDate.getDate() && month === todayDate.getMonth() && year === todayDate.getFullYear();
 
   return (
     <div className="space-y-6">
@@ -101,7 +99,11 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
       <CalendarGrid
         cells={cells}
         byDay={byDay}
-        isToday={isToday}
+        todayDay={todayDate.getDate()}
+        todayMonth={todayDate.getMonth()}
+        todayYear={todayDate.getFullYear()}
+        viewMonth={month}
+        viewYear={year}
         dayNames={dayNames}
         creatorLabel={(uid) => creatorLabels[uid] ?? "Anggota"}
       />

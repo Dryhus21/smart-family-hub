@@ -17,12 +17,18 @@ type CalendarEvent = {
 type Props = {
   cells: (number | null)[];
   byDay: Record<number, CalendarEvent[]>;
-  isToday: (d: number) => boolean;
+  todayDay: number;
+  todayMonth: number;
+  todayYear: number;
+  viewMonth: number;
+  viewYear: number;
   dayNames: string[];
   creatorLabel: (uid: string) => string;
 };
 
-export default function CalendarGrid({ cells, byDay, isToday, dayNames, creatorLabel }: Props) {
+export default function CalendarGrid({ cells, byDay, todayDay, todayMonth, todayYear, viewMonth, viewYear, dayNames, creatorLabel }: Props) {
+  const isToday = (d: number) =>
+    d === todayDay && viewMonth === todayMonth && viewYear === todayYear;
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
 
   const selectedEvents = selectedDay ? (byDay[selectedDay] ?? []) : [];
