@@ -100,8 +100,13 @@ export function DesktopSidebar({ ctx }: { ctx: LoggedInCtx }) {
 
         {/* User card */}
         <div className="mx-2.5 flex items-center overflow-hidden rounded-xl border border-white/70 bg-white/70 p-2">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-primary/40 bg-primary-strong text-sm font-bold text-on-primary">
-            {ctx.profile.full_name.charAt(0).toUpperCase()}
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-primary/40 bg-primary-strong text-sm font-bold text-on-primary overflow-hidden">
+            {ctx.profile.avatar_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={ctx.profile.avatar_url} alt={ctx.profile.full_name} className="h-full w-full object-cover" />
+            ) : (
+              ctx.profile.full_name.charAt(0).toUpperCase()
+            )}
           </div>
           <div className="ml-2 flex-1 overflow-hidden opacity-0 transition-opacity duration-150 group-hover/sidebar:opacity-100">
             <div className="truncate text-xs font-semibold text-on-surface">{ctx.profile.full_name}</div>

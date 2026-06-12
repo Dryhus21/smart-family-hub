@@ -134,8 +134,13 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           </h1>
           <p className="mt-2 text-on-surface-variant">Ringkasan aktivitas {ctx.family.family_name}.</p>
         </div>
-        <div className="hidden h-10 w-10 items-center justify-center rounded-full border border-primary/60 bg-primary-container/30 font-bold text-primary md:flex">
-          {ctx.profile.full_name.charAt(0).toUpperCase()}
+        <div className="hidden h-10 w-10 items-center justify-center rounded-full border border-primary/60 bg-primary-container/30 font-bold text-primary md:flex overflow-hidden">
+          {ctx.profile.avatar_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={ctx.profile.avatar_url} alt={ctx.profile.full_name} className="h-full w-full object-cover" />
+          ) : (
+            ctx.profile.full_name.charAt(0).toUpperCase()
+          )}
         </div>
       </header>
 
