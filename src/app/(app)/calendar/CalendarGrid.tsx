@@ -23,10 +23,10 @@ type Props = {
   viewMonth: number;
   viewYear: number;
   dayNames: string[];
-  creatorLabel: (uid: string) => string;
+  creatorLabels: Record<string, string>;
 };
 
-export default function CalendarGrid({ cells, byDay, todayDay, todayMonth, todayYear, viewMonth, viewYear, dayNames, creatorLabel }: Props) {
+export default function CalendarGrid({ cells, byDay, todayDay, todayMonth, todayYear, viewMonth, viewYear, dayNames, creatorLabels }: Props) {
   const isToday = (d: number) =>
     d === todayDay && viewMonth === todayMonth && viewYear === todayYear;
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
@@ -139,7 +139,7 @@ export default function CalendarGrid({ cells, byDay, todayDay, todayMonth, today
                     )}
                     <span className="inline-flex items-center gap-1">
                       <Icon name="person" className="text-sm" />
-                      {creatorLabel(e.created_by)}
+                      {creatorLabels[e.created_by] ?? "Anggota"}
                     </span>
                   </div>
                   {e.description && (

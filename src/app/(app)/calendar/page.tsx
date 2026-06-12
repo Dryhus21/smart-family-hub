@@ -105,7 +105,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
         viewMonth={month}
         viewYear={year}
         dayNames={dayNames}
-        creatorLabel={(uid) => creatorLabels[uid] ?? "Anggota"}
+        creatorLabels={creatorLabels}
       />
     </div>
   );
