@@ -37,26 +37,20 @@ export function NavBottomLink({ href, icon, label }: { href: string; icon: strin
   const pathname = usePathname();
   const active = pathname === href || (href !== "/dashboard" && pathname.startsWith(href));
 
-  if (active) {
-    return (
-      <Link
-        href={href}
-        prefetch
-        className="flex h-12 w-12 flex-col items-center justify-center rounded-full bg-primary-strong text-on-primary shadow-md transition-transform active:scale-90"
-      >
-        <Icon name={icon} filled className="text-xl" />
-        <span className="mt-0.5 text-[9px] font-bold uppercase tracking-wide">{label}</span>
-      </Link>
-    );
-  }
   return (
     <Link
       href={href}
       prefetch
-      className="flex h-12 w-12 flex-col items-center justify-center text-on-surface-variant transition hover:text-primary"
+      className={`flex flex-1 min-w-0 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1.5 transition active:scale-95 ${
+        active
+          ? "bg-primary-strong/15 text-primary"
+          : "text-on-surface-variant hover:text-primary"
+      }`}
     >
-      <Icon name={icon} className="text-xl" />
-      <span className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide">{label}</span>
+      <Icon name={icon} filled={active} className="text-lg" />
+      <span className="text-[8.5px] font-semibold uppercase tracking-wide leading-none truncate w-full text-center">
+        {label}
+      </span>
     </Link>
   );
 }

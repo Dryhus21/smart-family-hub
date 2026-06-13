@@ -10,8 +10,11 @@ import { logoutAction } from "../(auth)/actions";
 const BOTTOM_NAV = [
   { href: "/dashboard", label: "Home", icon: "home" },
   { href: "/calendar", label: "Kalender", icon: "calendar_month" },
+  { href: "/events", label: "Acara", icon: "celebration" },
   { href: "/tasks", label: "Tugas", icon: "assignment_turned_in" },
+  { href: "/notes", label: "Catatan", icon: "note_alt" },
   { href: "/family", label: "Keluarga", icon: "groups" },
+  { href: "/activity", label: "Riwayat", icon: "history" },
 ];
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -60,9 +63,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
       {/* Mobile top bar */}
       <header className="fixed top-0 z-30 flex h-16 w-full items-center justify-between border-b border-white/60 bg-glass-bg-strong px-4 backdrop-blur-lg lg:hidden">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <Logo size={32} />
-          <span className="text-sm font-extrabold text-primary">{ctx.family.family_name}</span>
+        <Link href="/dashboard" className="flex items-center gap-2.5">
+          <Logo size={34} className="shrink-0" />
+          <div className="flex flex-col leading-tight">
+            <span className="text-sm font-extrabold tracking-tight text-on-surface">{ctx.family.family_name}</span>
+            <span className="text-[9px] font-semibold uppercase tracking-[0.15em] text-on-surface/70">Smart Living</span>
+          </div>
         </Link>
         <form action={logoutAction}>
           <SubmitButton className="rounded-lg p-2 text-on-surface-variant" pendingLabel="">
@@ -72,7 +78,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </header>
 
       {/* Mobile bottom nav */}
-      <nav className="fixed bottom-3 left-1/2 z-50 flex w-[90%] -translate-x-1/2 items-center justify-around rounded-full border border-white/70 bg-glass-bg-strong p-2 shadow-[0_8px_30px_-8px_rgba(47,91,120,0.35)] backdrop-blur-lg lg:hidden">
+      <nav className="fixed bottom-3 left-1/2 z-50 flex w-[95%] max-w-md -translate-x-1/2 items-center justify-between gap-0.5 rounded-2xl border border-white/70 bg-glass-bg-strong px-2 py-1.5 shadow-[0_8px_30px_-8px_rgba(47,91,120,0.35)] backdrop-blur-lg lg:hidden">
         {BOTTOM_NAV.map((n) => (
           <NavBottomLink key={n.href} href={n.href} icon={n.icon} label={n.label} />
         ))}
