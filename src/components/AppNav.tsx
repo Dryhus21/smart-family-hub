@@ -41,14 +41,14 @@ export function NavBottomLink({ href, icon, label }: { href: string; icon: strin
     <Link
       href={href}
       prefetch
-      className={`flex flex-1 min-w-0 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1.5 transition active:scale-95 ${
+      className={`flex shrink-0 flex-col items-center justify-center gap-1 rounded-xl px-4 py-2 transition active:scale-95 ${
         active
           ? "bg-primary-strong/15 text-primary"
           : "text-on-surface-variant hover:text-primary"
       }`}
     >
-      <Icon name={icon} filled={active} className="text-lg" />
-      <span className="text-[8.5px] font-semibold uppercase tracking-wide leading-none truncate w-full text-center">
+      <Icon name={icon} filled={active} className="text-xl" />
+      <span className="text-[10px] font-semibold uppercase tracking-wide leading-none whitespace-nowrap">
         {label}
       </span>
     </Link>

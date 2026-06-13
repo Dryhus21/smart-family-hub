@@ -77,11 +77,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </form>
       </header>
 
-      {/* Mobile bottom nav */}
-      <nav className="fixed bottom-3 left-1/2 z-50 flex w-[95%] max-w-md -translate-x-1/2 items-center justify-between gap-0.5 rounded-2xl border border-white/70 bg-glass-bg-strong px-2 py-1.5 shadow-[0_8px_30px_-8px_rgba(47,91,120,0.35)] backdrop-blur-lg lg:hidden">
-        {BOTTOM_NAV.map((n) => (
-          <NavBottomLink key={n.href} href={n.href} icon={n.icon} label={n.label} />
-        ))}
+      {/* Mobile bottom nav — horizontal scroll */}
+      <nav className="fixed bottom-3 left-1/2 z-50 w-[95%] max-w-md -translate-x-1/2 overflow-hidden rounded-2xl border border-white/70 bg-glass-bg-strong shadow-[0_8px_30px_-8px_rgba(47,91,120,0.35)] backdrop-blur-lg lg:hidden">
+        <div className="mobile-nav-scroll flex items-center gap-1 overflow-x-auto px-2 py-1.5">
+          {BOTTOM_NAV.map((n) => (
+            <NavBottomLink key={n.href} href={n.href} icon={n.icon} label={n.label} />
+          ))}
+        </div>
       </nav>
 
       {/* Main content */}

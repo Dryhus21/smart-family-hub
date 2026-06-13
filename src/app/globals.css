@@ -358,6 +358,20 @@ h1, h2, h3, h4, h5, .text-display-lg, .text-display-lg-mobile, .text-headline-md
   }
 }
 
+/* Mobile bottom nav — hide scrollbar but keep scroll */
+.mobile-nav-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+}
+.mobile-nav-scroll::-webkit-scrollbar {
+  display: none;
+}
+.mobile-nav-scroll > a {
+  scroll-snap-align: center;
+}
+
 /* Iridescence background — landing page only */
 .iridescence-bg {
   position: fixed;
