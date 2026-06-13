@@ -82,11 +82,11 @@ export function DesktopSidebar({ ctx }: { ctx: LoggedInCtx }) {
             <Logo size={36} />
           </span>
           <div className="ml-2 min-w-0 opacity-0 transition-opacity duration-150 group-hover/sidebar:opacity-100">
-            <div className="truncate text-sm font-extrabold tracking-tight text-primary">
+            <div className="truncate text-sm font-extrabold tracking-tight text-on-surface">
               {ctx.family?.family_name ?? "FamilyHub"}
             </div>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-on-surface-variant">
-              Family Hub
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-on-surface/70">
+              Smart Living
             </div>
           </div>
         </Link>

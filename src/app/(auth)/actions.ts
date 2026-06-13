@@ -42,5 +42,6 @@ export async function loginAction(_prev: ActionResult, formData: FormData): Prom
 export async function logoutAction() {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  redirect("/login");
+  revalidatePath("/", "layout");
+  redirect("/");
 }

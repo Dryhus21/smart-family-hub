@@ -55,20 +55,20 @@ export default async function Home() {
         />
       </div>
 
-      <nav className="fixed top-0 z-50 flex h-20 w-full items-center justify-between border-b border-white/30 bg-glass-bg px-5 backdrop-blur-md md:px-10">
-        <LogoWordmark />
-        <div className="hidden items-center gap-2 md:flex">
-          <Link href="/login" className="rounded-lg px-4 py-2 text-sm font-semibold text-on-surface transition hover:bg-white/40">
+      <nav className="fixed top-0 z-50 flex h-16 w-full items-center justify-between border-b border-white/30 bg-glass-bg px-4 backdrop-blur-md md:h-20 md:px-10">
+        <LogoWordmark variant="light" />
+        <div className="flex items-center gap-1.5 md:gap-2">
+          <Link href="/login" className="rounded-lg px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/15 md:px-4 md:py-2 md:text-sm">
             Masuk
           </Link>
-          <Link href="/register" className="btn btn-primary">
-            Daftar Gratis
+          <Link href="/register" className="btn btn-primary px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">
+            Daftar
           </Link>
         </div>
       </nav>
 
-      <main className="relative mx-auto max-w-7xl px-5 pt-32 pb-24 md:px-10">
-        <section className="relative z-10 mb-32 flex flex-col items-center text-center">
+      <main className="relative mx-auto max-w-7xl px-4 pt-24 pb-16 md:px-10 md:pt-32 md:pb-24">
+        <section className="relative z-10 mb-16 flex flex-col items-center text-center md:mb-32">
           <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/20 px-4 py-1.5 text-xs font-semibold tracking-wider text-white backdrop-blur-md">
             <Icon name="auto_awesome" className="text-base" /> VERSI 1.0 · JUNI 2026
           </span>
@@ -83,11 +83,11 @@ export default async function Home() {
             </GradientText>
           </h1>
 
-          <p className="mb-10 max-w-2xl text-headline-md font-normal text-white/90">
+          <p className="mb-8 max-w-2xl text-sm font-normal text-white/90 md:mb-10 md:text-headline-md">
             Tingkatkan kolaborasi keluarga dengan dashboard pintar. Harmonisasi jadwal, tugas, dan komunikasi dalam satu tempat yang tenang.
           </p>
 
-          <div className="flex flex-wrap justify-center gap-3">
+          <div className="flex w-full flex-col justify-center gap-3 sm:w-auto sm:flex-row sm:flex-wrap">
             <Link href="/register" className="btn btn-primary px-6 py-3 text-sm">
               <Icon name="rocket_launch" />
               Mulai Sekarang
@@ -97,8 +97,8 @@ export default async function Home() {
             </Link>
           </div>
 
-          <div className="mt-16 w-full max-w-5xl rounded-2xl border border-white/60 bg-white/60 p-2 backdrop-blur-xl">
-            <div className="rounded-xl border border-white/70 bg-surface-container/80 p-6">
+          <div className="mt-10 w-full max-w-5xl rounded-2xl border border-white/60 bg-white/60 p-2 backdrop-blur-xl md:mt-16">
+            <div className="rounded-xl border border-white/70 bg-surface-container/80 p-3 md:p-6">
               <div className="mb-4 flex items-center gap-2">
                 <div className="h-2.5 w-2.5 rounded-full bg-danger-red/70" />
                 <div className="h-2.5 w-2.5 rounded-full bg-warning/70" />
@@ -154,8 +154,46 @@ export default async function Home() {
           </div>
         </section>
 
-        <footer className="relative z-10 border-t border-white/30 py-8 text-center text-sm text-white/70">
-          © 2026 Smart Family Hub · Dryhus Dzacky Damingtyas
+        <footer className="relative z-10 border-t border-white/30 pt-10 pb-6 text-white/80">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+            <div>
+              <div className="mb-3 flex items-center gap-2 text-white">
+                <Icon name="cottage" className="text-base" filled />
+                <span className="font-extrabold tracking-tight">Smart Family Hub</span>
+              </div>
+              <p className="text-xs leading-relaxed text-white/70">
+                Platform manajemen keluarga yang membantu kolaborasi, jadwal, dan komunikasi keluarga.
+              </p>
+            </div>
+            <div>
+              <h4 className="mb-3 text-xs font-bold uppercase tracking-widest text-white">Kontak</h4>
+              <ul className="space-y-2 text-xs">
+                <li className="flex items-center gap-2">
+                  <Icon name="mail" className="text-sm" />
+                  <a href="mailto:hello@smartfamilyhub.app" className="hover:text-white">hello@smartfamilyhub.app</a>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Icon name="phone" className="text-sm" />
+                  <span>+62 812-3456-7890</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Icon name="location_on" className="text-sm" />
+                  <span>Jakarta, Indonesia</span>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="mb-3 text-xs font-bold uppercase tracking-widest text-white">Tautan</h4>
+              <ul className="space-y-2 text-xs">
+                <li><Link href="/login" className="hover:text-white">Masuk</Link></li>
+                <li><Link href="/register" className="hover:text-white">Daftar Gratis</Link></li>
+                <li><a href="#" className="hover:text-white">Tentang Kami</a></li>
+              </ul>
+            </div>
+          </div>
+          <div className="mt-8 border-t border-white/20 pt-4 text-center text-xs text-white/60">
+            © 2026 Smart Family Hub · Dryhus Dzacky Damingtyas
+          </div>
         </footer>
       </main>
     </div>

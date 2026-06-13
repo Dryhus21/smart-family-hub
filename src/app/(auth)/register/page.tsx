@@ -22,7 +22,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-md">
         <div className="mb-8 flex justify-center">
           <Link href="/">
-            <LogoWordmark size={40} />
+            <LogoWordmark size={40} variant="light" />
           </Link>
         </div>
 

@@ -28,13 +28,24 @@ export function Logo({ size = 36, className = "" }: { size?: number; className?:
   );
 }
 
-export function LogoWordmark({ size = 32 }: { size?: number }) {
+export function LogoWordmark({ size = 32, variant = "auto" }: { size?: number; variant?: "auto" | "light" | "dark" }) {
+  const isLight = variant === "light";
   return (
     <div className="flex items-center gap-3">
       <Logo size={size} />
       <div className="flex flex-col leading-tight">
-        <span className="text-lg font-extrabold tracking-tight text-primary">FamilyHub</span>
-        <span className="text-[10px] tracking-[0.18em] font-semibold uppercase text-on-surface-variant">
+        <span
+          className={`text-lg font-extrabold tracking-tight ${
+            isLight ? "text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.35)]" : "text-primary"
+          }`}
+        >
+          FamilyHub
+        </span>
+        <span
+          className={`text-[10px] tracking-[0.18em] font-semibold uppercase ${
+            isLight ? "text-white/85 drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]" : "text-on-surface"
+          }`}
+        >
           Smart Living
         </span>
       </div>

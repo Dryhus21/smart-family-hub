@@ -4,6 +4,15 @@ import { revalidatePath } from "next/cache";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { requireAdmin, requireFamily, logActivity } from "@/lib/auth";
 
+function generateShortToken(length = 6): string {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += alphabet[Math.floor(Math.random() * alphabet.length)];
+  }
+  return result;
+}
+
 export type UploadResult = { error?: string; url?: string };
 
 export async function uploadAvatarAction(formData: FormData): Promise<UploadResult> {
@@ -65,9 +74,10 @@ export async function inviteMemberAction(_prev: ActionResult, formData: FormData
   const { data: existing } = await service.from("family_invitations").select("token, status").eq("family_id", ctx.family.id).eq("email", email).eq("status", "pending").maybeSingle();
   if (existing) return { success: "Undangan sudah ada — kode di bawah.", token: existing.token };
 
+  const token = generateShortToken();
   const { data, error } = await service
     .from("family_invitations")
-    .insert({ family_id: ctx.family.id, email, invited_by: ctx.userId })
+    .insert({ family_id: ctx.family.id, email, invited_by: ctx.userId, token })
     .select()
     .single();
   if (error) return { error: error.message };
