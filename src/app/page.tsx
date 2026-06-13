@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { getAuthContext } from "@/lib/auth";
 import { LogoWordmark } from "@/components/Logo";
 import { Icon } from "@/components/Icon";
-import { DotField, ColorBends } from "@/components/effects/DotField";
+import Iridescence from "@/components/effects/Iridescence";
 import GradientText from "@/components/effects/GradientText";
 
 const FEATURES = [
@@ -45,17 +45,15 @@ export default async function Home() {
   if (ctx) redirect("/dashboard");
 
   return (
-    <div className="relative min-h-screen">
-      <ColorBends color="#5291b3" intensity={1.3} />
-      <DotField
-        dotRadius={2.4}
-        dotSpacing={14}
-        cursorRadius={500}
-        cursorForce={0.1}
-        bulgeOnly
-        bulgeStrength={67}
-        glowRadius={160}
-      />
+    <div className="relative min-h-screen overflow-hidden">
+      <div className="iridescence-bg">
+        <Iridescence
+          color={[0.47, 0.64, 0.82]}
+          mouseReact={false}
+          amplitude={0.1}
+          speed={0.7}
+        />
+      </div>
 
       <nav className="fixed top-0 z-50 flex h-20 w-full items-center justify-between border-b border-white/30 bg-glass-bg px-5 backdrop-blur-md md:px-10">
         <LogoWordmark />
@@ -69,23 +67,23 @@ export default async function Home() {
         </div>
       </nav>
 
-      <main className="mx-auto max-w-7xl px-5 pt-32 pb-24 md:px-10">
-        <section className="mb-32 flex flex-col items-center text-center">
-          <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/60 px-4 py-1.5 text-xs font-semibold tracking-wider text-primary backdrop-blur-md">
+      <main className="relative mx-auto max-w-7xl px-5 pt-32 pb-24 md:px-10">
+        <section className="relative z-10 mb-32 flex flex-col items-center text-center">
+          <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/20 px-4 py-1.5 text-xs font-semibold tracking-wider text-white backdrop-blur-md">
             <Icon name="auto_awesome" className="text-base" /> VERSI 1.0 · JUNI 2026
           </span>
 
-          <h1 className="mb-6 max-w-4xl text-display-lg-mobile md:text-display-lg">
+          <h1 className="mb-6 max-w-3xl" style={{fontSize: 'clamp(2rem, 4.5vw, 3.5rem)', lineHeight: '1.12', fontWeight: 800, letterSpacing: '-0.03em'}}>
             <GradientText
-              colors={["#2f5b78", "#5291b3", "#8b6f53", "#2f5b78"]}
-              animationSpeed={6}
-              className="leading-[1.1]"
+              colors={["#ffffff", "#FEFFAF", "#cce4ff", "#ffffff"]}
+              animationSpeed={5}
+              className="leading-none"
             >
               Kelola Keluarga Anda dalam Satu Dashboard Cerdas
             </GradientText>
           </h1>
 
-          <p className="mb-10 max-w-2xl text-headline-md font-normal text-on-surface/85">
+          <p className="mb-10 max-w-2xl text-headline-md font-normal text-white/90">
             Tingkatkan kolaborasi keluarga dengan dashboard pintar. Harmonisasi jadwal, tugas, dan komunikasi dalam satu tempat yang tenang.
           </p>
 
@@ -105,7 +103,7 @@ export default async function Home() {
                 <div className="h-2.5 w-2.5 rounded-full bg-danger-red/70" />
                 <div className="h-2.5 w-2.5 rounded-full bg-warning/70" />
                 <div className="h-2.5 w-2.5 rounded-full bg-success-green/70" />
-                <span className="ml-3 text-xs text-on-surface-variant">smart-family-hub.app/dashboard</span>
+                <span className="ml-3 text-xs text-on-surface/70">smart-family-hub.app/dashboard</span>
               </div>
               <div className="grid gap-3 md:grid-cols-4">
                 {[
@@ -135,10 +133,10 @@ export default async function Home() {
           </div>
         </section>
 
-        <section className="mb-20">
+        <section className="relative z-10 mb-20">
           <div className="mb-10 text-center">
-            <h2 className="text-headline-md font-extrabold text-on-surface">Fitur Utama</h2>
-            <p className="mt-2 text-on-surface/80">Semua yang dibutuhkan untuk mengelola keluarga modern.</p>
+            <h2 className="text-headline-md font-extrabold text-white">Fitur Utama</h2>
+            <p className="mt-2 text-white/80">Semua yang dibutuhkan untuk mengelola keluarga modern.</p>
           </div>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
             {FEATURES.map((f) => {
@@ -148,15 +146,15 @@ export default async function Home() {
                   <div className={`mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full ${t.bg} ${t.text} ring-1 ring-white/70`}>
                     <Icon name={f.icon} filled />
                   </div>
-                  <h3 className={`text-lg font-bold ${t.text}`}>{f.title}</h3>
-                  <p className="mt-2 text-sm text-on-surface/80">{f.desc}</p>
+                  <h3 className="text-lg font-bold text-white">{f.title}</h3>
+                  <p className="mt-2 text-sm text-white/80">{f.desc}</p>
                 </div>
               );
             })}
           </div>
         </section>
 
-        <footer className="border-t border-white/40 py-8 text-center text-sm text-on-surface/75">
+        <footer className="relative z-10 border-t border-white/30 py-8 text-center text-sm text-white/70">
           © 2026 Smart Family Hub · Dryhus Dzacky Damingtyas
         </footer>
       </main>

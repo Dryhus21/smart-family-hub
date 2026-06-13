@@ -17,13 +17,13 @@ type DotFieldProps = {
 
 export function DotField({
   dotRadius = 2.4,
-  dotSpacing = 14,
-  cursorRadius = 500,
-  cursorForce = 0.10,
+  dotSpacing = 24,
+  cursorRadius = 180,
+  cursorForce = 6,
   bulgeOnly = true,
-  bulgeStrength = 67,
+  bulgeStrength = 1,
   glowRadius = 160,
-  color = "rgba(74, 117, 149, 0.22)",
+  color = "rgba(120, 162, 210, 0.55)",
 }: DotFieldProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -38,7 +38,8 @@ export function DotField({
     let mouseX = -10000;
     let mouseY = -10000;
     let raf = 0;
-    type Dot = { x: number; y: number; baseX: number; baseY: number };
+
+    type Dot = { x: number; y: number; baseX: number; baseY: number; vx: number; vy: number };
     let dots: Dot[] = [];
 
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -54,7 +55,7 @@ export function DotField({
       dots = [];
       for (let x = dotSpacing / 2; x < width; x += dotSpacing) {
         for (let y = dotSpacing / 2; y < height; y += dotSpacing) {
-          dots.push({ x, y, baseX: x, baseY: y });
+          dots.push({ x, y, baseX: x, baseY: y, vx: 0, vy: 0 });
         }
       }
     };
@@ -74,37 +75,34 @@ export function DotField({
       // Soft glow halo following cursor
       if (mouseX > -1000 && glowRadius > 0) {
         const grad = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, glowRadius);
-        grad.addColorStop(0, "rgba(82, 145, 179, 0.18)");
-        grad.addColorStop(0.5, "rgba(82, 145, 179, 0.08)");
-        grad.addColorStop(1, "rgba(82, 145, 179, 0)");
+        grad.addColorStop(0, "rgba(254, 255, 175, 0.3)");
+        grad.addColorStop(0.5, "rgba(120, 162, 210, 0.15)");
+        grad.addColorStop(1, "rgba(120, 162, 210, 0)");
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, width, height);
       }
 
       ctx.fillStyle = color;
       for (const dot of dots) {
-        const dx = mouseX - dot.x;
-        const dy = mouseY - dot.y;
+        const dx = dot.x - mouseX;
+        const dy = dot.y - mouseY;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
         if (dist < cursorRadius && dist > 0) {
-          // Bulge: dots move AWAY from cursor (outward push)
-          const normalized = 1 - dist / cursorRadius;
-          const force = bulgeStrength * normalized * cursorForce;
+          // Push dots away from cursor
+          const force = (1 - dist / cursorRadius) * cursorForce;
           const angle = Math.atan2(dy, dx);
-          if (bulgeOnly) {
-            // Push only outward, never pull through
-            dot.x -= Math.cos(angle) * force * 0.06;
-            dot.y -= Math.sin(angle) * force * 0.06;
-          } else {
-            dot.x -= Math.cos(angle) * force * 0.06;
-            dot.y -= Math.sin(angle) * force * 0.06;
-          }
-        } else {
-          // Spring back to base position when out of cursor range
-          dot.x += (dot.baseX - dot.x) * 0.08;
-          dot.y += (dot.baseY - dot.y) * 0.08;
+          dot.vx += Math.cos(angle) * force;
+          dot.vy += Math.sin(angle) * force;
         }
+
+        // Spring back + damping
+        dot.vx += (dot.baseX - dot.x) * 0.15;
+        dot.vy += (dot.baseY - dot.y) * 0.15;
+        dot.vx *= 0.82;
+        dot.vy *= 0.82;
+        dot.x += dot.vx;
+        dot.y += dot.vy;
 
         ctx.beginPath();
         ctx.arc(dot.x, dot.y, dotRadius, 0, Math.PI * 2);
@@ -138,11 +136,9 @@ type ColorBendsProps = {
 };
 
 export function ColorBends({
-  color = "#5291b3",
+  color = "#78A2D2",
   intensity = 1.3,
 }: ColorBendsProps) {
-  // CSS-driven approximation of the React Bits WebGL ColorBends
-  // Multiple animated radial gradients in the user's base color
   return (
     <div
       className="color-bends"
@@ -150,8 +146,8 @@ export function ColorBends({
       style={{
         background: `
           radial-gradient(ellipse 60% 50% at 18% 20%, ${color}66, transparent 60%),
-          radial-gradient(ellipse 50% 60% at 82% 30%, #F3E3D0aa, transparent 55%),
-          radial-gradient(ellipse 70% 40% at 50% 92%, #D2C4B4cc, transparent 65%),
+          radial-gradient(ellipse 50% 60% at 82% 30%, #FEFFAFcc, transparent 55%),
+          radial-gradient(ellipse 70% 40% at 50% 92%, #b8d1e8cc, transparent 65%),
           radial-gradient(ellipse 40% 35% at 75% 75%, ${color}55, transparent 60%)
         `,
         filter: `blur(${48 * intensity}px) saturate(${1 + intensity * 0.1})`,

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useActionState } from "react";
 import { registerAction, type ActionResult } from "../actions";
 import { LogoWordmark } from "@/components/Logo";
-import { DotField, ColorBends } from "@/components/effects/DotField";
+import Iridescence from "@/components/effects/Iridescence";
 import GradientText from "@/components/effects/GradientText";
 import { Icon } from "@/components/Icon";
 
@@ -15,8 +15,9 @@ export default function RegisterPage() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center px-4 py-12">
-      <ColorBends color="#5291b3" intensity={1.3} />
-      <DotField dotRadius={2.4} dotSpacing={14} cursorRadius={500} cursorForce={0.1} bulgeOnly bulgeStrength={67} glowRadius={160} />
+      <div className="iridescence-bg">
+        <Iridescence color={[0.47, 0.64, 0.82]} mouseReact={false} amplitude={0.1} speed={0.7} />
+      </div>
 
       <div className="w-full max-w-md">
         <div className="mb-8 flex justify-center">
@@ -27,7 +28,7 @@ export default function RegisterPage() {
 
         <div className="glass-card-strong neon-card p-8">
           <h1 className="text-2xl font-extrabold tracking-tight">
-            <GradientText colors={["#2f5b78", "#5291b3", "#8b6f53", "#2f5b78"]} animationSpeed={5}>
+            <GradientText colors={["#1e3f62", "#78A2D2", "#a8aa20", "#1e3f62"]} animationSpeed={5}>
               Daftar Akun Baru
             </GradientText>
           </h1>
