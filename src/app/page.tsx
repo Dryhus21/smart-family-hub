@@ -170,15 +170,15 @@ export default async function Home() {
               <ul className="space-y-2 text-xs">
                 <li className="flex items-center gap-2">
                   <Icon name="mail" className="text-sm" />
-                  <a href="mailto:hello@smartfamilyhub.app" className="hover:text-white">hello@smartfamilyhub.app</a>
+                  <a href="mailto:dzacky98ku@gmail.com" className="hover:text-white">dzacky98ku@gmail.com</a>
                 </li>
                 <li className="flex items-center gap-2">
                   <Icon name="phone" className="text-sm" />
-                  <span>+62 812-3456-7890</span>
+                  <a href="https://wa.me/62895605352141" target="_blank" rel="noopener noreferrer" className="hover:text-white">+62 895-6053-52141</a>
                 </li>
                 <li className="flex items-center gap-2">
                   <Icon name="location_on" className="text-sm" />
-                  <span>Jakarta, Indonesia</span>
+                  <span>Bandung, Indonesia</span>
                 </li>
               </ul>
             </div>
