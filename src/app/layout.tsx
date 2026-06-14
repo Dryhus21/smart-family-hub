@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Nunito, Poppins } from "next/font/google";
+import { Nunito, Poppins, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import TargetCursor from "@/components/effects/TargetCursor";
 
@@ -15,6 +15,12 @@ const poppins = Poppins({
   weight: ["400", "500", "600", "700"],
 });
 
+const jakarta = Plus_Jakarta_Sans({
+  variable: "--font-app",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+});
+
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -27,7 +33,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="id" className={`${nunito.variable} ${poppins.variable}`}>
+    <html lang="id" className={`${nunito.variable} ${poppins.variable} ${jakarta.variable}`}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
@@ -36,7 +42,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
         />
       </head>
-      <body className="min-h-screen bg-background text-foreground antialiased">
+      <body className="min-h-screen bg-background text-foreground antialiased" suppressHydrationWarning>
         <TargetCursor spinDuration={2} hideDefaultCursor={true} parallaxOn={true} targetSelector="a, button, input, textarea, select, [role='button'], label" />
         {children}
       </body>

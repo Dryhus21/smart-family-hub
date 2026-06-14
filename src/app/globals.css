@@ -372,6 +372,316 @@ h1, h2, h3, h4, h5, .text-display-lg, .text-display-lg-mobile, .text-headline-md
   scroll-snap-align: center;
 }
 
+/* Sidebar glass on Grainient — Figma: refraction 30, depth 23, dispersion 37, frost 5, splay 11 */
+.sidebar-glass {
+  /* Solid cream tint base + soft top-light gradient — opaque enough to not bleed into Grainient */
+  background:
+    linear-gradient(135deg, rgba(255, 253, 230, 0.55) 0%, rgba(255, 253, 230, 0.42) 100%),
+    rgba(255, 253, 230, 0.6);
+  backdrop-filter: blur(60px) saturate(237%) brightness(1.05);
+  -webkit-backdrop-filter: blur(60px) saturate(237%) brightness(1.05);
+  border-right: 1px solid rgba(0, 73, 83, 0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 253, 230, 0.7),
+    inset 1px 0 0 rgba(255, 253, 230, 0.5),
+    inset -1px 0 0 rgba(0, 73, 83, 0.22),
+    11px 0 23px -8px rgba(0, 73, 83, 0.32),
+    23px 0 46px -16px rgba(0, 73, 83, 0.25);
+}
+
+/* === Kindred Soft-Shell theme — applied only to post-login app shell === */
+.app-shell {
+  --background: #004953;
+  --background-deep: #002f36;
+  --surface: #0a3a44;
+  --surface-container: #0e4651;
+  --surface-container-low: #0a3a44;
+  --surface-container-lowest: #07313a;
+  --surface-container-high: #145562;
+  --surface-container-highest: #1c6675;
+  --surface-variant: #0e4651;
+  --surface-bright: #1c6675;
+  --surface-dim: #002f36;
+
+  --accent: #feffaf;
+  --accent-soft: #f7f8c8;
+  --accent-strong: #d4d57a;
+
+  --primary: #78a2d2;
+  --primary-strong: #5a86ba;
+  --primary-soft: #a8c2e0;
+  --primary-container: #1f4869;
+  --on-primary: #ffffff;
+  --on-primary-container: #d8e6f4;
+  --inverse-primary: #a8c2e0;
+
+  --secondary: #feffaf;
+  --secondary-container: #3a3a1a;
+  --on-secondary: #2a2a08;
+  --on-secondary-container: #feffaf;
+
+  --tertiary: #f3c98b;
+  --tertiary-container: #6a4818;
+  --tertiary-fixed: #f9d9c2;
+  --tertiary-fixed-dim: #e8b599;
+  --on-tertiary: #2a1a08;
+
+  --foreground: #0a3540;
+  --on-background: #0a3540;
+  --on-surface: #0a3540;
+  --on-surface-variant: #2e5a66;
+
+  --success-green: #b8d57a;
+  --danger-red: #ef6b6b;
+  --warning: #f3c98b;
+  --error: #ef6b6b;
+  --error-container: #6b1a1a;
+  --on-error: #ffffff;
+  --on-error-container: #ffd6d6;
+
+  --outline: rgba(244, 246, 232, 0.22);
+  --outline-variant: rgba(244, 246, 232, 0.1);
+
+  --glass-bg: rgba(255, 253, 230, 0.7);
+  --glass-bg-strong: rgba(255, 253, 230, 0.88);
+  --glass-border: rgba(255, 255, 255, 0.6);
+
+  --neon-border: rgba(254, 255, 175, 0.35);
+  --neon-indigo: #78a2d2;
+  --surface-glow: rgba(120, 162, 210, 0.2);
+
+  background-color: transparent;
+  color: var(--foreground);
+  font-family: var(--font-app), "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif !important;
+  letter-spacing: -0.005em;
+}
+
+/* Make body transparent inside app-shell so Grainient shows through */
+body:has(.app-shell) {
+  background-color: transparent;
+}
+
+.app-shell h1,
+.app-shell h2,
+.app-shell h3,
+.app-shell h4,
+.app-shell h5,
+.app-shell h6,
+.app-shell p,
+.app-shell span:not(.material-symbols-outlined),
+.app-shell div,
+.app-shell button,
+.app-shell a,
+.app-shell input,
+.app-shell label,
+.app-shell .text-display-lg,
+.app-shell .text-display-lg-mobile,
+.app-shell .text-headline-md,
+.app-shell .font-display {
+  font-family: var(--font-app), "Plus Jakarta Sans", system-ui, sans-serif !important;
+}
+
+.app-shell .material-symbols-outlined {
+  font-family: "Material Symbols Outlined" !important;
+}
+
+.app-shell .glass-card {
+  background: linear-gradient(145deg, rgba(255, 253, 230, 0.85) 0%, rgba(254, 255, 220, 0.78) 100%);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0, 73, 83, 0.18), 0 2px 6px rgba(0, 73, 83, 0.1);
+  color: #0a3540;
+}
+.app-shell .glass-card-strong {
+  background: linear-gradient(145deg, rgba(255, 254, 240, 0.95) 0%, rgba(254, 255, 220, 0.9) 100%);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 1.5rem;
+  box-shadow: 0 14px 40px rgba(0, 73, 83, 0.22), 0 4px 10px rgba(0, 73, 83, 0.12);
+  color: #0a3540;
+}
+.app-shell .neon-card {
+  background: linear-gradient(145deg, rgba(255, 253, 230, 0.82) 0%, rgba(254, 255, 220, 0.75) 100%);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0, 73, 83, 0.16);
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #0a3540;
+}
+.app-shell .neon-card:hover {
+  background: linear-gradient(145deg, rgba(255, 254, 240, 0.95) 0%, rgba(254, 255, 220, 0.88) 100%);
+  border-color: rgba(120, 162, 210, 0.55);
+  box-shadow: 0 18px 44px rgba(120, 162, 210, 0.3);
+  transform: translateY(-3px);
+}
+.app-shell .card {
+  background: linear-gradient(145deg, rgba(255, 253, 230, 0.82) 0%, rgba(254, 255, 220, 0.75) 100%);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 24px rgba(0, 73, 83, 0.14);
+  color: #0a3540;
+}
+
+/* Helpers — inner surfaces inside cards */
+.app-shell .bg-surface-container,
+.app-shell .bg-surface-container\/60,
+.app-shell .bg-surface-container\/50,
+.app-shell .bg-surface-container\/80 {
+  background-color: rgba(255, 253, 230, 0.55) !important;
+}
+.app-shell .bg-surface-container-low,
+.app-shell .bg-surface-container-high {
+  background-color: rgba(255, 254, 240, 0.65) !important;
+}
+.app-shell .border-white\/5,
+.app-shell .border-white\/10,
+.app-shell .border-white\/20 {
+  border-color: rgba(0, 73, 83, 0.1) !important;
+}
+.app-shell .bg-white\/5,
+.app-shell .bg-white\/10 {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* === Text visibility on Grainient background === */
+/* Headings sitting directly on Grainient get a cream halo so they pop on any zone */
+.app-shell h1,
+.app-shell h2,
+.app-shell h3,
+.app-shell h4,
+.app-shell h5,
+.app-shell h6,
+.app-shell .text-display-lg,
+.app-shell .text-display-lg-mobile,
+.app-shell .text-headline-md {
+  color: #0a3540;
+  text-shadow:
+    0 1px 2px rgba(255, 254, 220, 0.95),
+    0 0 14px rgba(255, 254, 220, 0.6);
+}
+
+/* Body text directly under main (outside cards) — soft halo */
+.app-shell main > div > p,
+.app-shell main > div > div > p,
+.app-shell main > section > p,
+.app-shell main > p {
+  color: #0a3540;
+  text-shadow: 0 1px 2px rgba(255, 254, 220, 0.85);
+}
+
+/* Anything explicitly marked on-surface-variant outside cards stays readable */
+.app-shell main > div > .text-on-surface-variant,
+.app-shell main > div > div > .text-on-surface-variant,
+.app-shell main > section > .text-on-surface-variant {
+  color: #1e4a56;
+  text-shadow: 0 1px 2px rgba(255, 254, 220, 0.85);
+}
+
+/* Inside cards: no halo needed, plain dark on cream */
+.app-shell .glass-card,
+.app-shell .glass-card *,
+.app-shell .glass-card-strong,
+.app-shell .glass-card-strong *,
+.app-shell .neon-card,
+.app-shell .neon-card *,
+.app-shell .card,
+.app-shell .card * {
+  text-shadow: none !important;
+}
+
+/* Gradient text is color: transparent — a shadow would draw a ghost */
+.app-shell .text-gradient {
+  text-shadow: none !important;
+  background: linear-gradient(110deg, #0a3540, #1f5d76, #a8aa20);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Sidebar text always light (sidebar has its own dark glass) */
+.app-shell .sidebar-glass,
+.app-shell .sidebar-glass * {
+  text-shadow: none !important;
+}
+
+/* Header-accent card variant per design system */
+.app-shell .glass-card.accent-primary { border-left: 6px solid #24657e; }
+.app-shell .glass-card.accent-secondary { border-left: 6px solid #546526; }
+.app-shell .glass-card.accent-tertiary { border-left: 6px solid #605f50; }
+
+.app-shell .text-gradient {
+  background: linear-gradient(110deg, #0a566e, #24657e, #546526);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.app-shell .btn-primary {
+  background: #24657e;
+  color: #ffffff;
+  box-shadow: 0 6px 18px -6px rgba(36, 101, 126, 0.5);
+  border-radius: 9999px;
+}
+.app-shell .btn-primary:hover:not(:disabled) {
+  background: #0a566e;
+  box-shadow: 0 8px 24px -6px rgba(10, 86, 110, 0.55);
+}
+.app-shell .btn-secondary {
+  background: #e5e6ff;
+  color: #161a32;
+  border: 1px solid rgba(192, 200, 205, 0.6);
+  border-radius: 9999px;
+}
+.app-shell .btn-secondary:hover:not(:disabled) {
+  background: #dee0ff;
+}
+.app-shell .btn-outline {
+  border: 2px solid #24657e;
+  color: #24657e;
+  background: #ffffff;
+  border-radius: 9999px;
+}
+.app-shell .btn-outline:hover:not(:disabled) {
+  background: #24657e;
+  color: #ffffff;
+}
+.app-shell .btn-accent {
+  background: #d3e89b;
+  color: #3c4c10;
+  border: 1px solid #bacf84;
+  border-radius: 9999px;
+}
+.app-shell .btn-ghost:hover:not(:disabled) {
+  background: rgba(36, 101, 126, 0.08);
+}
+
+.app-shell .input {
+  background: #f4f2ff;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 16px;
+  color: #161a32;
+}
+.app-shell .input:focus {
+  background: #ffffff;
+  border-bottom-color: #546526;
+  box-shadow: 0 0 0 4px rgba(84, 101, 38, 0.12);
+}
+.app-shell .input::placeholder {
+  color: #40484c;
+  opacity: 0.55;
+}
+.app-shell .label {
+  color: #40484c;
+}
+
 /* Iridescence background — landing page only */
 .iridescence-bg {
   position: fixed;

@@ -6,6 +6,7 @@ import { Icon } from "@/components/Icon";
 import { NavBottomLink } from "@/components/AppNav";
 import { DesktopSidebar } from "@/components/Sidebar";
 import { logoutAction } from "../(auth)/actions";
+import Grainient from "@/components/effects/Grainient";
 
 const BOTTOM_NAV = [
   { href: "/dashboard", label: "Home", icon: "home" },
@@ -14,6 +15,7 @@ const BOTTOM_NAV = [
   { href: "/tasks", label: "Tugas", icon: "assignment_turned_in" },
   { href: "/notes", label: "Catatan", icon: "note_alt" },
   { href: "/family", label: "Keluarga", icon: "groups" },
+  { href: "/profile", label: "Profil", icon: "account_circle" },
   { href: "/activity", label: "Riwayat", icon: "history" },
 ];
 
@@ -48,16 +50,34 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Soft background bends across app */}
-      <div
-        className="pointer-events-none fixed inset-0 -z-10"
-        style={{
-          background:
-            "radial-gradient(ellipse 40% 35% at 90% 10%, rgba(243,227,208,0.45), transparent 70%), radial-gradient(ellipse 40% 35% at 10% 95%, rgba(210,196,180,0.4), transparent 70%)",
-        }}
-        aria-hidden
-      />
+    <div className="app-shell min-h-screen">
+      {/* Grainient WebGL background */}
+      <div className="pointer-events-none fixed inset-0 -z-10">
+        <Grainient
+          color1="#feffaf"
+          color2="#78a2d2"
+          color3="#004953"
+          timeSpeed={1.3}
+          colorBalance={-0.08}
+          warpStrength={0.45}
+          warpFrequency={12}
+          warpSpeed={1.5}
+          warpAmplitude={49}
+          blendAngle={-9}
+          blendSoftness={0.05}
+          rotationAmount={430}
+          noiseScale={2.0}
+          grainAmount={0.03}
+          grainScale={2.0}
+          grainAnimated={false}
+          contrast={1}
+          gamma={1.0}
+          saturation={1.0}
+          centerX={0.0}
+          centerY={0.0}
+          zoom={0.9}
+        />
+      </div>
 
       <DesktopSidebar ctx={ctx as Parameters<typeof DesktopSidebar>[0]["ctx"]} />
 

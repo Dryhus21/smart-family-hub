@@ -21,6 +21,7 @@ const NAV: NavItem[] = [
   { href: "/tasks", label: "Tugas", icon: "assignment_turned_in" },
   { href: "/notes", label: "Catatan", icon: "note_alt" },
   { href: "/family", label: "Keluarga", icon: "groups" },
+  { href: "/profile", label: "Profil", icon: "account_circle" },
   { href: "/activity", label: "Riwayat", icon: "history" },
 ];
 
@@ -36,14 +37,14 @@ function SidebarLink({ href, icon, label }: NavItem) {
       title={label}
       className={`group/link relative flex h-11 items-center overflow-hidden rounded-xl transition-all duration-200 ${
         active
-          ? "border-r-4 border-primary-strong bg-primary-strong/15 text-primary"
-          : "text-on-surface-variant hover:bg-white/50 hover:text-primary"
+          ? "border-r-4 border-[#004953] bg-[#004953]/25 text-[#04222a] backdrop-blur-md"
+          : "text-[#04222a] hover:bg-[#004953]/20 hover:text-[#04222a] hover:backdrop-blur-md"
       }`}
     >
       {/* Icon — fixed 44px column so it stays centered when collapsed */}
       <span className="flex h-11 w-11 shrink-0 items-center justify-center">
         {pending ? (
-          <Spinner className="h-4 w-4 text-primary-strong" />
+          <Spinner className="h-4 w-4 text-[#04222a]" />
         ) : (
           <Icon name={icon} filled={active} className="text-xl" />
         )}
@@ -60,12 +61,9 @@ export function DesktopSidebar({ ctx }: { ctx: LoggedInCtx }) {
   return (
     <aside
       className="
-        group/sidebar
+        group/sidebar sidebar-glass
         fixed left-0 top-0 z-40 hidden h-screen
         w-[64px] overflow-hidden
-        border-r border-white/40 bg-glass-bg-strong
-        shadow-[8px_0_30px_-12px_rgba(47,91,120,0.2)]
-        backdrop-blur-xl
         transition-[width] duration-200 ease-in-out
         hover:w-[260px]
         lg:flex lg:flex-col
@@ -82,10 +80,10 @@ export function DesktopSidebar({ ctx }: { ctx: LoggedInCtx }) {
             <Logo size={36} />
           </span>
           <div className="ml-2 min-w-0 opacity-0 transition-opacity duration-150 group-hover/sidebar:opacity-100">
-            <div className="truncate text-sm font-extrabold tracking-tight text-on-surface">
+            <div className="truncate text-sm font-extrabold tracking-tight text-[#04222a]">
               {ctx.family?.family_name ?? "FamilyHub"}
             </div>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-on-surface/70">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#04222a]/75">
               Smart Living
             </div>
           </div>
@@ -98,28 +96,35 @@ export function DesktopSidebar({ ctx }: { ctx: LoggedInCtx }) {
           ))}
         </nav>
 
-        {/* User card */}
-        <div className="mx-2.5 flex items-center overflow-hidden rounded-xl border border-white/70 bg-white/70 p-2">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-primary/40 bg-primary-strong text-sm font-bold text-on-primary overflow-hidden">
+        {/* User card — click to go to profile */}
+        <div className="mx-2.5 flex items-center overflow-hidden rounded-xl border border-[#004953]/25 bg-[#004953]/15 p-2 backdrop-blur-md">
+          <Link
+            href="/profile"
+            title="Profil saya"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#004953]/40 bg-[#004953] text-sm font-bold text-white overflow-hidden transition hover:ring-2 hover:ring-[#004953]/40"
+          >
             {ctx.profile.avatar_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={ctx.profile.avatar_url} alt={ctx.profile.full_name} className="h-full w-full object-cover" />
             ) : (
               ctx.profile.full_name.charAt(0).toUpperCase()
             )}
-          </div>
-          <div className="ml-2 flex-1 overflow-hidden opacity-0 transition-opacity duration-150 group-hover/sidebar:opacity-100">
-            <div className="truncate text-xs font-semibold text-on-surface">{ctx.profile.full_name}</div>
-            <div className="text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant">
+          </Link>
+          <Link
+            href="/profile"
+            className="ml-2 flex-1 overflow-hidden opacity-0 transition-opacity duration-150 group-hover/sidebar:opacity-100"
+          >
+            <div className="truncate text-xs font-semibold text-[#04222a] hover:underline">{ctx.profile.full_name}</div>
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-[#04222a]/70">
               {ctx.isAdmin ? "Admin" : "Anggota"}
             </div>
-          </div>
+          </Link>
           <form
             action={logoutAction}
             className="ml-1 shrink-0 opacity-0 transition-opacity duration-150 group-hover/sidebar:opacity-100"
           >
             <SubmitButton
-              className="rounded-lg p-1.5 text-on-surface-variant transition hover:bg-danger-red/10 hover:text-danger-red"
+              className="rounded-lg p-1.5 text-[#04222a]/75 transition hover:bg-danger-red/20 hover:text-danger-red"
               pendingLabel=""
             >
               <Icon name="logout" className="text-base" />

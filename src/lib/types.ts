@@ -12,6 +12,8 @@ export type Profile = {
   full_name: string;
   email: string;
   avatar_url: string | null;
+  birth_date: string | null;
+  description: string | null;
   created_at: string;
 };
 
